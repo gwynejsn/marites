@@ -1,1 +1,52 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* === Primary Brand (Indigo) === */
+  --color-primary: #6c5ce7; /* Vivid indigo */
+  --color-primary-dark: #5742d4; /* Deep indigo for dark mode highlights */
+
+  /* === Accent (Electric Teal) === */
+  --color-accent: #00ffd1; /* Vibrant neon teal */
+  --color-accent-dark: #00c0a2; /* Muted version for dark mode */
+
+  /* === Backgrounds === */
+  --color-background: #ffffff; /* Pure white for high contrast */
+  --color-background-dark: #0b0b13; /* Deep black-indigo for rich dark mode */
+
+  /* === Surfaces / Cards / Inputs === */
+  --color-surface: #f1f2f6; /* Subtle light gray surface */
+  --color-surface-dark: #1a1a2e; /* Dim indigo-tinted surface */
+
+  /* === Chat Bubbles === */
+  --color-bubble-incoming: #eef1ff; /* Soft lavender blue */
+  --color-bubble-outgoing: #d8e0ff; /* Indigo-tinted pale blue */
+  --color-bubble-incoming-dark: #23243a; /* Slightly brighter than background */
+  --color-bubble-outgoing-dark: #353656; /* Indigo-gray for contrast */
+
+  /* === Text Colors === */
+  --color-color-primary: #1a1a1a; /* Jet black for readability */
+  --color-color-primary-dark: #ffffff; /* Pure white for clarity in dark */
+  --color-text-secondary: #5f6368; /* Subtle gray in light */
+  --color-text-secondary-dark: #aab0d0; /* Cool muted blue in dark */
+
+  /* === Icon Colors === */
+  --color-icon: #2f2f47; /* Rich indigo-slate in light */
+  --color-icon-dark: #e4e6ff; /* Bright pale indigo for dark */
+
+  /* === Borders / Dividers === */
+  --color-border: #e0e6ed; /* Light gray for light mode */
+  --color-border-dark: #3a3a5a; /* Dark muted violet-gray */
+
+  /* === Status Colors === */
+  --color-success: #3be8b0; /* Fresh minty green */
+  --color-info: #5bc0eb; /* Vibrant sky blue */
+  --color-warning: #ffd166; /* Warm golden yellow */
+  --color-error: #ef476f; /* Bright reddish pink */
+
+  /* === Sidebar Colors === */
+
+  --color-sidebar: #a29bfe;
+  --color-sidebar-dark: #1a1a2e; /* Dim indigo-tinted surface */
+}

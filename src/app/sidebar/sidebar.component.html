@@ -1,0 +1,267 @@
+<section
+  class="flex flex-col justify-between h-screen py-6 px-4 dark:bg-sidebar-dark drop-shadow-xl text-color-primary-dark text-md bg-sidebar"
+  [ngClass]="showSidebar() ? 'min-w-51' : ''"
+>
+  <div class="flex flex-col gap-2">
+    <button
+      class="flex gap-4 p-2 hover:scale-110 transition-transform"
+      (click)="toggleSidebar()"
+    >
+      <svg
+        [ngClass]="showSidebar() ? '' : 'scale-x-[-1]'"
+        class="invert w-9 transition-transform"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m4.431 12.822 13 9A1 1 0 0 0 19 21V3a1 1 0 0 0-1.569-.823l-13 9a1.003 1.003 0 0 0 0 1.645z"
+        />
+      </svg>
+    </button>
+
+    <!-- Top Icons -->
+    <ul class="flex flex-col gap-2 items-start">
+      <!-- Chat Area -->
+      <li>
+        <a
+          class="gap-4 flex items-center p-2 hover:scale-110 transition-transform"
+          [routerLink]="['/chat-area']"
+          routerLinkActive="bg-primary transition-colors rounded-lg"
+        >
+          <svg
+            class="invert w-9 hover:opacity-95 transition"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22ZM8 13.25C7.58579 13.25 7.25 13.5858 7.25 14C7.25 14.4142 7.58579 14.75 8 14.75H13.5C13.9142 14.75 14.25 14.4142 14.25 14C14.25 13.5858 13.9142 13.25 13.5 13.25H8ZM7.25 10.5C7.25 10.0858 7.58579 9.75 8 9.75H16C16.4142 9.75 16.75 10.0858 16.75 10.5C16.75 10.9142 16.4142 11.25 16 11.25H8C7.58579 11.25 7.25 10.9142 7.25 10.5Z"
+              fill="#000000"
+            />
+          </svg>
+          <p
+            [ngClass]="{
+              'hidden transition-discrete not-peer-has-checked:opacity-0 peer-has-checked:block':
+                !showSidebar()
+            }"
+          >
+            messages
+          </p>
+        </a>
+      </li>
+
+      <!-- Friend Requests -->
+      <li>
+        <a
+          class="gap-4 flex items-center justify-center p-2 hover:scale-110 transition-transform"
+          [routerLink]="['/friend-requests']"
+          routerLinkActive="bg-primary transition-colors rounded-lg"
+        >
+          <svg
+            class="invert w-9 hover:opacity-95 transition"
+            fill="#000000"
+            viewBox="0 -64 640 640"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M192 256c61.9 0 112-50.1 112-112S253.9 32 192 32 80 82.1 80 144s50.1 112 112 112zm76.8 32h-8.3c-20.8 10-43.9 16-68.5 16s-47.6-6-68.5-16h-8.3C51.6 288 0 339.6 0 403.2V432c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48v-28.8c0-63.6-51.6-115.2-115.2-115.2zM480 256c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zm48 32h-3.8c-13.9 4.8-28.6 8-44.2 8s-30.3-3.2-44.2-8H432c-20.4 0-39.2 5.9-55.7 15.4 24.4 26.3 39.7 61.2 39.7 99.8v38.4c0 2.2-.5 4.3-.6 6.4H592c26.5 0 48-21.5 48-48 0-61.9-50.1-112-112-112z"
+            />
+          </svg>
+          <p
+            [ngClass]="{
+              'hidden transition-discrete not-peer-has-checked:opacity-0 peer-has-checked:block':
+                !showSidebar()
+            }"
+            class="text-nowrap"
+          >
+            friend requests
+          </p>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Bottom Icons -->
+  <div class="flex flex-col gap-2">
+    <ul class="flex flex-col gap-2 items-start">
+      <!-- Profile -->
+      <li>
+        <a
+          class="gap-4 flex items-center justify-center p-2 hover:scale-110 transition-transform"
+          [routerLink]="['/user-profile']"
+          routerLinkActive="bg-primary transition-colors rounded-lg"
+        >
+          <svg
+            class="invert w-9 hover:opacity-95 transition"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
+              fill="#000000"
+            />
+            <path
+              d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z"
+              fill="#000000"
+            />
+          </svg>
+          <p
+            [ngClass]="{
+              'hidden transition-discrete not-peer-has-checked:opacity-0 peer-has-checked:block':
+                !showSidebar()
+            }"
+          >
+            profile
+          </p>
+        </a>
+      </li>
+
+      <!-- Settings -->
+      <li>
+        <a
+          class="gap-4 flex items-center justify-center p-2 hover:scale-110 transition-transform"
+          [routerLink]="['/settings']"
+          routerLinkActive="bg-primary transition-colors rounded-lg"
+        >
+          <svg
+            class="invert w-9 hover:opacity-95 transition"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M14.2788 2.15224C13.9085 2 13.439 2 12.5 2C11.561 2 11.0915 2 10.7212 2.15224C10.2274 2.35523 9.83509 2.74458 9.63056 3.23463C9.53719 3.45834 9.50065 3.7185 9.48635 4.09799C9.46534 4.65568 9.17716 5.17189 8.69017 5.45093C8.20318 5.72996 7.60864 5.71954 7.11149 5.45876C6.77318 5.2813 6.52789 5.18262 6.28599 5.15102C5.75609 5.08178 5.22018 5.22429 4.79616 5.5472C4.47814 5.78938 4.24339 6.1929 3.7739 6.99993C3.30441 7.80697 3.06967 8.21048 3.01735 8.60491C2.94758 9.1308 3.09118 9.66266 3.41655 10.0835C3.56506 10.2756 3.77377 10.437 4.0977 10.639C4.57391 10.936 4.88032 11.4419 4.88029 12C4.88026 12.5581 4.57386 13.0639 4.0977 13.3608C3.77372 13.5629 3.56497 13.7244 3.41645 13.9165C3.09108 14.3373 2.94749 14.8691 3.01725 15.395C3.06957 15.7894 3.30432 16.193 3.7738 17C4.24329 17.807 4.47804 18.2106 4.79606 18.4527C5.22008 18.7756 5.75599 18.9181 6.28589 18.8489C6.52778 18.8173 6.77305 18.7186 7.11133 18.5412C7.60852 18.2804 8.2031 18.27 8.69012 18.549C9.17714 18.8281 9.46533 19.3443 9.48635 19.9021C9.50065 20.2815 9.53719 20.5417 9.63056 20.7654C9.83509 21.2554 10.2274 21.6448 10.7212 21.8478C11.0915 22 11.561 22 12.5 22C13.439 22 13.9085 22 14.2788 21.8478C14.7726 21.6448 15.1649 21.2554 15.3694 20.7654C15.4628 20.5417 15.4994 20.2815 15.5137 19.902C15.5347 19.3443 15.8228 18.8281 16.3098 18.549C16.7968 18.2699 17.3914 18.2804 17.8886 18.5412C18.2269 18.7186 18.4721 18.8172 18.714 18.8488C19.2439 18.9181 19.7798 18.7756 20.2038 18.4527C20.5219 18.2105 20.7566 17.807 21.2261 16.9999C21.6956 16.1929 21.9303 15.7894 21.9827 15.395C22.0524 14.8691 21.9088 14.3372 21.5835 13.9164C21.4349 13.7243 21.2262 13.5628 20.9022 13.3608C20.4261 13.0639 20.1197 12.558 20.1197 11.9999C20.1197 11.4418 20.4261 10.9361 20.9022 10.6392C21.2263 10.4371 21.435 10.2757 21.5836 10.0835C21.9089 9.66273 22.0525 9.13087 21.9828 8.60497C21.9304 8.21055 21.6957 7.80703 21.2262 7C20.7567 6.19297 20.522 5.78945 20.2039 5.54727C19.7799 5.22436 19.244 5.08185 18.7141 5.15109C18.4722 5.18269 18.2269 5.28136 17.8887 5.4588C17.3915 5.71959 16.7969 5.73002 16.3099 5.45096C15.8229 5.17191 15.5347 4.65566 15.5136 4.09794C15.4993 3.71848 15.4628 3.45833 15.3694 3.23463C15.1649 2.74458 14.7726 2.35523 14.2788 2.15224ZM12.5 15C14.1695 15 15.5228 13.6569 15.5228 12C15.5228 10.3431 14.1695 9 12.5 9C10.8305 9 9.47716 10.3431 9.47716 12C9.47716 13.6569 10.8305 15 12.5 15Z"
+              fill="#000000"
+            />
+          </svg>
+          <p
+            [ngClass]="{
+              'hidden transition-discrete not-peer-has-checked:opacity-0 peer-has-checked:block':
+                !showSidebar()
+            }"
+          >
+            settings
+          </p>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mode -->
+    <ul class="flex flex-col gap-2 items-start">
+      <li>
+        <button
+          class="flex gap-4 p-2 items-start justify-center hover:scale-110 transition-transform"
+          (click)="darkModeService.toggleDarkMode()"
+        >
+          <!-- light mode sun -->
+          <svg
+            *ngIf="!darkModeService.darkMode()"
+            class="w-9"
+            version="1.0"
+            id="Layer_1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 64 64"
+            enable-background="new 0 0 64 64"
+            xml:space="preserve"
+            fill="#fffb00"
+          >
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              <g>
+                <circle
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  cx="32.003"
+                  cy="32.005"
+                  r="16.001"
+                ></circle>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  d="M12.001,31.997c0-2.211-1.789-4-4-4H4c-2.211,0-4,1.789-4,4 s1.789,4,4,4h4C10.212,35.997,12.001,34.208,12.001,31.997z"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  d="M12.204,46.139l-2.832,2.833c-1.563,1.562-1.563,4.094,0,5.656 c1.562,1.562,4.094,1.562,5.657,0l2.833-2.832c1.562-1.562,1.562-4.095,0-5.657C16.298,44.576,13.767,44.576,12.204,46.139z"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  d="M32.003,51.999c-2.211,0-4,1.789-4,4V60c0,2.211,1.789,4,4,4 s4-1.789,4-4l-0.004-4.001C36.003,53.788,34.21,51.999,32.003,51.999z"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  d="M51.798,46.143c-1.559-1.566-4.091-1.566-5.653-0.004 s-1.562,4.095,0,5.657l2.829,2.828c1.562,1.57,4.094,1.562,5.656,0s1.566-4.09,0-5.656L51.798,46.143z"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  d="M60.006,27.997l-4.009,0.008 c-2.203-0.008-3.992,1.781-3.992,3.992c-0.008,2.211,1.789,4,3.992,4h4.001c2.219,0.008,4-1.789,4-4 C64.002,29.79,62.217,27.997,60.006,27.997z"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  d="M51.798,17.859l2.828-2.829c1.574-1.566,1.562-4.094,0-5.657 c-1.559-1.567-4.09-1.567-5.652-0.004l-2.829,2.836c-1.562,1.555-1.562,4.086,0,5.649C47.699,19.426,50.239,19.418,51.798,17.859z"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  d="M32.003,11.995c2.207,0.016,4-1.789,4-3.992v-4 c0-2.219-1.789-4-4-4c-2.211-0.008-4,1.781-4,3.993l0.008,4.008C28.003,10.206,29.792,11.995,32.003,11.995z"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="#f5ec00"
+                  d="M12.212,17.855c1.555,1.562,4.079,1.562,5.646-0.004 c1.574-1.551,1.566-4.09,0.008-5.649l-2.829-2.828c-1.57-1.571-4.094-1.559-5.657,0c-1.575,1.559-1.575,4.09-0.012,5.653 L12.212,17.855z"
+                ></path>
+              </g>
+            </g>
+          </svg>
+
+          <!-- dark mode moon -->
+          <svg
+            *ngIf="darkModeService.darkMode()"
+            class="w-9"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              <path
+                d="M12 22C17.5228 22 22 17.5228 22 12C22 11.5373 21.3065 11.4608 21.0672 11.8568C19.9289 13.7406 17.8615 15 15.5 15C11.9101 15 9 12.0899 9 8.5C9 6.13845 10.2594 4.07105 12.1432 2.93276C12.5392 2.69347 12.4627 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                fill="#FCE96A"
+              ></path>
+            </g>
+          </svg>
+        </button>
+      </li>
+    </ul>
+  </div>
+</section>
