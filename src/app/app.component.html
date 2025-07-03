@@ -1,6 +1,9 @@
-<div
-  class="flex bg-background dark:bg-background-dark text-color-primary dark:text-color-primary-dark"
->
-  <app-sidebar></app-sidebar>
-  <router-outlet />
+<div class="flex">
+  <app-sidebar *ngIf="authenticated"></app-sidebar>
+
+  <div
+    class="min-h-screen min-w-screen bg-background dark:bg-background-dark text-background-dark dark:text-background"
+  >
+    <router-outlet />
+  </div>
 </div>
