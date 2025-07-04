@@ -20,12 +20,12 @@ export class LoginComponent {
     this.loading = true;
     signInWithEmailAndPassword(this.auth, val.email, val.password)
       .then((res) => {
-        console.log(res);
         this.router.navigate(['/chat-area']);
         this.loading = false;
       })
       .catch((err) => {
         this.error = this.handleErrorMessages(err.code);
+        this.loading = false;
       });
   }
 

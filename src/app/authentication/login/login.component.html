@@ -18,7 +18,6 @@
           #email="ngModel"
           name="email"
           ngModel
-          email
           [ngClass]="{
             'border-red-500 border-2': email.touched && email.invalid
           }"
@@ -51,7 +50,7 @@
     </div>
     <button
       class="w-full p-4 bg-primary text-white rounded-full disabled:opacity-30"
-      [disabled]="loginForm.touched && loginForm.invalid"
+      [disabled]="loginForm.invalid"
     >
       LOGIN
     </button>
