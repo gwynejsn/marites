@@ -125,7 +125,9 @@ export class UserProfileEffects {
         }),
         switchMap(() => {
           return from(signOut(this.auth)).pipe(
-            tap(() => this.router.navigate(['/authentication']))
+            tap(() => {
+              this.router.navigate(['/authentication']);
+            })
           );
         })
       ),

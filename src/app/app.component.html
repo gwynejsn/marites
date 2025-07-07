@@ -1,9 +1,16 @@
-<div class="flex">
-  <app-sidebar *ngIf="authenticated"></app-sidebar>
+<ng-container *ngIf="isAuthRoute; else mainLayout">
+  <!-- Authentication layout -->
+  <router-outlet />
+</ng-container>
 
-  <div
-    class="min-h-screen min-w-screen bg-background dark:bg-background-dark text-background-dark dark:text-background"
-  >
-    <router-outlet />
+<ng-template #mainLayout>
+  <div class="flex">
+    <app-sidebar *ngIf="authenticated"></app-sidebar>
+
+    <div
+      class="min-h-screen min-w-screen bg-background dark:bg-background-dark text-background-dark dark:text-background"
+    >
+      <router-outlet />
+    </div>
   </div>
-</div>
+</ng-template>
