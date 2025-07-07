@@ -3,25 +3,36 @@ import { Component } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { createClient } from '@supabase/supabase-js';
-import { supabase } from '../../../environments/supabase';
-import { Gender } from '../../shared/enums/gender';
+import { CloudinaryModule } from '@cloudinary/ng';
+import { select, Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
+import { storeStructure } from '../../app.config';
+import {
+  resetLoadingError,
+  signUpStart,
+} from '../../main-interface/user-profile/store/user-profile.actions';
+import {
+  selectUserProfile,
+  selectUserProfileError,
+  selectUserProfileLoading,
+} from '../../main-interface/user-profile/store/user-profile.selectors';
+import { UserProfileService } from '../../main-interface/user-profile/user-profile.service';
+import { gender } from '../../shared/types';
 
 @Component({
   selector: 'app-sign-up',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, CloudinaryModule],
   templateUrl: './sign-up.component.html',
   styles: ``,
 })
 export class SignUpComponent {
-  defaultProfilePicture =
-    'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
-  genders = Object.values(Gender);
+  genders = ['Male', 'Female', 'Other'];
   step: number = 1;
-  profilePreview: string | ArrayBuffer | null = this.defaultProfilePicture;
-  loading = false;
-  error: string | null = null;
-  private supabase = createClient(supabase.supabaseUrl, supabase.supabaseKey);
+  profilePreview: string | ArrayBuffer | null =
+    environment.defaultProfilePicture;
+  loading$: Observable<boolean>;
+  error$: Observable<string | null>;
 
   formData = {
     firstName: '',
@@ -34,25 +45,35 @@ export class SignUpComponent {
     profilePicture: null as File | null,
   };
 
-  constructor(private auth: Auth, private router: Router) {}
+  constructor(
+    private auth: Auth,
+    private router: Router,
+    private userProfileService: UserProfileService,
+    private store$: Store<storeStructure>
+  ) {
+    store$.dispatch(resetLoadingError());
+    this.loading$ = store$.pipe(select(selectUserProfileLoading));
+    this.error$ = store$.pipe(select(selectUserProfileError));
+    this.loading$.subscribe((loading) => console.log('loading is ', loading));
+  }
 
-  signup() {
-    console.log('Submitted:', this.formData);
-    this.loading = true;
-    // createUserWithEmailAndPassword(
-    //   this.auth,
-    //   this.formData.email,
-    //   this.formData.password
-    // )
-    //   .then((res) => {
-    //     this.router.navigate(['/chat-area']);
-    //     this.loading = false;
-    //   })
-    //   .catch((err) => {
-    //     this.error = this.handleCreateAccountError(err.code);
-    //     this.loading = false;
-    //   });
-    this.uploadProfilePicture();
+  async signup() {
+    this.store$.dispatch(
+      signUpStart({
+        form: {
+          firstName: this.formData.firstName,
+          lastName: this.formData.lastName,
+          age: this.formData.age!,
+          gender: this.formData.gender as gender,
+          email: this.formData.email,
+          password: this.formData.password,
+          profilePicture: this.formData.profilePicture,
+        },
+      })
+    );
+    this.store$.pipe(select(selectUserProfile)).subscribe((up) => {
+      if (up.userProfile) this.router.navigate(['/chat-area']);
+    });
   }
 
   changeProfileSelected(event: Event): void {
@@ -64,38 +85,6 @@ export class SignUpComponent {
         this.profilePreview = reader.result;
       };
       reader.readAsDataURL(file);
-    }
-  }
-
-  uploadProfilePicture() {
-    if (this.formData.profilePicture) {
-      const filePath = this.formData.email + '/profile';
-      this.supabase.storage
-        .from('profile-picture')
-        .upload(filePath, this.formData.profilePicture)
-        .then((res) => console.log(res))
-        .catch((err) => console.log(err));
-    }
-  }
-
-  handleCreateAccountError(errMsg: string): string {
-    switch (errMsg) {
-      case 'auth/email-already-in-use':
-        return 'This email is already associated with an account.';
-      case 'auth/invalid-email':
-        return 'The email address is badly formatted.';
-      case 'auth/operation-not-allowed':
-        return 'Creating accounts is currently disabled. Please contact support.';
-      case 'auth/weak-password':
-        return 'Password should be at least 6 characters long.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your internet connection.';
-      case 'auth/too-many-requests':
-        return 'Too many attempts. Please try again later.';
-      case 'auth/internal-error':
-        return 'An internal error occurred. Please try again.';
-      default:
-        return 'An unknown error occurred. Please try again.';
     }
   }
 }
