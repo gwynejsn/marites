@@ -6,7 +6,6 @@ import { map } from 'rxjs';
 export const authenticationGuard: CanActivateFn = () => {
   const auth = inject(Auth);
   const router = inject(Router);
-  console.log('testing guard');
 
   return authState(auth).pipe(
     map((user) => (user ? true : router.createUrlTree(['/authentication'])))

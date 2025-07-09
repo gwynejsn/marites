@@ -12,6 +12,11 @@ type signUpForm = {
   profilePicture: File | null;
 };
 
+export const setUserProfile = createAction(
+  '[user-profile] set user profile',
+  props<{ userProfile: UserProfile }>()
+);
+
 export const signUpStart = createAction(
   '[user-profile] sign up start',
   props<{ form: signUpForm }>()
@@ -46,8 +51,12 @@ export const resetLoadingError = createAction(
   '[user-profile] reset loading error'
 );
 
-export const autoLoadFromLocalStorage = createAction(
-  '[user-profile] auto load from local storage'
-);
+export const autoLogin = createAction('[user-profile] auto login');
 
 export const logout = createAction('[user-profile] logout');
+
+// auto logout
+export const setAutoLogoutTimeout = createAction(
+  '[user-profile] set auto logout timeout',
+  props<{ timeoutRef: any }>()
+);

@@ -1,12 +1,14 @@
 import { createReducer, on } from '@ngrx/store';
 import { UserProfile } from '../../../shared/model/user-profile.model';
 import {
-  autoLoadFromLocalStorage,
+  autoLogin,
   loginFailure,
   loginStart,
   loginSuccess,
   logout,
   resetLoadingError,
+  setAutoLogoutTimeout,
+  setUserProfile,
   signUpFailure,
   signUpStart,
   signUpSuccess,
@@ -26,6 +28,11 @@ export const reducerInitialValues = {
 
 export const userProfileReducer = createReducer<userProfileState>(
   reducerInitialValues,
+  on(setUserProfile, (state, { userProfile }) => ({
+    ...state,
+    userProfile: userProfile,
+  })),
+
   on(signUpStart, (state) => ({ ...state, loading: true })), // loading and error are still initial value when started
   on(signUpSuccess, (state, { userProfile }) => ({
     ...state,
@@ -56,23 +63,17 @@ export const userProfileReducer = createReducer<userProfileState>(
     loading: false,
   })),
 
-  on(autoLoadFromLocalStorage, (state) => {
-    const userProfileJSON = localStorage.getItem('userProfile');
-    let userProfile = null;
-
-    if (userProfileJSON)
-      userProfile = UserProfile.fromJSON(JSON.parse(userProfileJSON));
-
-    return {
-      userProfile: userProfile,
-      error: null,
-      loading: false,
-    };
-  }),
-
   on(logout, (state) => ({
     userProfile: null,
     error: null,
     loading: false,
   }))
+);
+
+// auto logout
+
+export const autoLogoutTimeoutReducer = createReducer<any>(
+  null,
+  on(autoLogin, (state) => state),
+  on(setAutoLogoutTimeout, (state, { timeoutRef }) => timeoutRef)
 );

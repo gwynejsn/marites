@@ -1,7 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import {
   Auth,
+  authState,
   createUserWithEmailAndPassword,
+  IdTokenResult,
   signInWithEmailAndPassword,
   signOut,
 } from '@angular/fire/auth';
@@ -9,17 +11,30 @@ import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { Timestamp } from 'firebase/firestore';
-import { catchError, from, map, mergeMap, of, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  first,
+  from,
+  map,
+  mergeMap,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 import { storeStructure } from '../../../app.config';
 import { UserProfile } from '../../../shared/model/user-profile.model';
 import { gender } from '../../../shared/types';
 import { UserProfileService } from '../user-profile.service';
 import {
+  autoLogin,
   loginFailure,
   loginStart,
   loginSuccess,
   logout,
+  setAutoLogoutTimeout,
+  setUserProfile,
   signUpFailure,
   signUpStart,
   signUpSuccess,
@@ -169,7 +184,45 @@ export class UserProfileEffects {
     )
   );
 
-  // TODO save to local storage user profile
+  autoLogin = createEffect(() =>
+    this.actions$.pipe(
+      ofType(autoLogin),
+      switchMap(() => {
+        const userProfileJSON = localStorage.getItem('userProfile');
+        if (!userProfileJSON) return EMPTY;
+
+        const userProfile = UserProfile.fromJSON(JSON.parse(userProfileJSON));
+
+        return authState(this.auth).pipe(
+          first(),
+          switchMap((user) => {
+            if (!user) return EMPTY;
+
+            return from(user.getIdTokenResult()).pipe(
+              switchMap((tokenResult: IdTokenResult) => {
+                const expirationTime = new Date(tokenResult.expirationTime);
+                const msUntilExpire = expirationTime.getTime() - Date.now();
+                console.log('expires in ', expirationTime);
+
+                const timeoutRef = setTimeout(() => {
+                  this.store$.dispatch(logout());
+                }, msUntilExpire);
+
+                return of(
+                  setUserProfile({ userProfile }),
+                  setAutoLogoutTimeout({ timeoutRef })
+                );
+              }),
+              catchError((err) => {
+                console.error('Failed to get token result', err);
+                return EMPTY;
+              })
+            );
+          })
+        );
+      })
+    )
+  );
 
   handleErrors(errMsg: string): string {
     switch (errMsg) {
@@ -194,10 +247,6 @@ export class UserProfileEffects {
         return 'No user found with this email.';
       case 'auth/user-disabled':
         return 'This user account has been disabled.';
-      case 'auth/invalid-email':
-        return 'The email address is badly formatted.';
-      case 'auth/internal-error':
-        return 'An internal error occurred. Please try again.';
       default:
         return 'An unknown error occurred. Please try again.';
     }

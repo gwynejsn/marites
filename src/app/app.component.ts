@@ -4,7 +4,7 @@ import { Auth, authState, User } from '@angular/fire/auth';
 import { Router, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { storeStructure } from './app.config';
-import { autoLoadFromLocalStorage } from './main-interface/user-profile/store/user-profile.actions';
+import { autoLogin } from './main-interface/user-profile/store/user-profile.actions';
 import { DarkModeService } from './shared/dark-mode.service';
 import { SidebarComponent } from './sidebar/sidebar.component';
 
@@ -28,7 +28,8 @@ export class AppComponent {
     authState$.subscribe((user: User | null) => {
       this.authenticated = user ? true : false;
     });
-    store$.dispatch(autoLoadFromLocalStorage());
+    console.log('dispatching');
+    store$.dispatch(autoLogin());
   }
 
   get isAuthRoute(): boolean {

@@ -10,6 +10,7 @@ import { firebase } from '../environments/firebase';
 import { routes } from './app.routes';
 import { UserProfileEffects } from './main-interface/user-profile/store/user-profile.effects';
 import {
+  autoLogoutTimeoutReducer,
   userProfileReducer,
   userProfileState,
 } from './main-interface/user-profile/store/user-profile.reducers';
@@ -24,10 +25,15 @@ export const appConfig: ApplicationConfig = {
     provideEffects(UserProfileEffects),
     provideStore(),
     provideState({ name: 'userProfile', reducer: userProfileReducer }),
+    provideState({
+      name: 'autoLoginTimeout',
+      reducer: autoLogoutTimeoutReducer,
+    }),
   ],
 };
 
 // used in selectors
 export interface storeStructure {
   userProfile: userProfileState;
+  autoLoginTimeout: any;
 }
