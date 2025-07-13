@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
+import { ChatWindowComponent } from './chat-window/chat-window.component';
+import { ListOfMessagesComponent } from './list-of-messages/list-of-messages.component';
 
 @Component({
   selector: 'app-chat-area',
-  imports: [],
+  imports: [ListOfMessagesComponent, ChatWindowComponent],
   templateUrl: './chat-area.component.html',
-  styleUrl: './chat-area.component.css'
+  styleUrl: './chat-area.component.css',
 })
-export class ChatAreaComponent {
-
-}
+export class ChatAreaComponent {}

@@ -1,0 +1,22 @@
+<section class="border-2 w-[25%] flex flex-col items-center p-4">
+  <h3>Friend Suggestions</h3>
+  <div
+    *ngFor="let user of addableUsers"
+    class="border-1 p-4 rounded-sm w-full flex justify-between"
+  >
+    <!-- <div class="flex gap-4 items-center justify-center">
+      <img
+        [src]="user.profile.profilePicture"
+        [alt]="'Profile picture of ' + user.profile.firstName"
+        class="w-[60px] rounded-full"
+      />
+      <p>{{ user.profile.firstName + " " + user.profile.lastName }}</p>
+    </div> -->
+    <div
+      class="bg-primary w-12 rounded-2xl flex items-center justify-center hover:opacity-95"
+    >
+      <button (click)="addFriend(user.id)">Add</button>
+    </div>
+  </div>
+  <p *ngIf="addableUsers.length === 0">No Suggestions</p>
+</section>

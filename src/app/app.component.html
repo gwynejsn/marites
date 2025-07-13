@@ -5,10 +5,10 @@
 
 <ng-template #mainLayout>
   <div class="flex">
-    <app-sidebar *ngIf="authenticated"></app-sidebar>
+    <app-sidebar *ngIf="isAuthenticated$ | async"></app-sidebar>
 
     <div
-      class="min-h-screen min-w-screen bg-background dark:bg-background-dark text-background-dark dark:text-background"
+      class="min-h-screen min-w-screen bg-background dark:bg-background-dark text-background-dark dark:text-background flex-1"
     >
       <router-outlet />
     </div>

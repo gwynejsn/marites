@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Auth, authState, User } from '@angular/fire/auth';
+import { Auth } from '@angular/fire/auth';
 import { Router, RouterOutlet } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { storeStructure } from './app.config';
-import { autoLogin } from './main-interface/user-profile/store/user-profile.actions';
+import { AuthenticationService } from './authentication/authentication.service';
+import { selectIsAuthenticated } from './authentication/store/authentication.selectors';
 import { DarkModeService } from './shared/dark-mode.service';
 import { SidebarComponent } from './sidebar/sidebar.component';
 
@@ -16,20 +18,17 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 })
 export class AppComponent {
   title = 'marites';
-  authenticated = false;
+  isAuthenticated$: Observable<boolean>;
 
   constructor(
     private auth: Auth,
     private store$: Store<storeStructure>,
     private darkModeService: DarkModeService,
-    private router: Router
+    private router: Router,
+    private authenticationService: AuthenticationService
   ) {
-    const authState$ = authState(auth);
-    authState$.subscribe((user: User | null) => {
-      this.authenticated = user ? true : false;
-    });
-    console.log('dispatching');
-    store$.dispatch(autoLogin());
+    this.isAuthenticated$ = store$.pipe(select(selectIsAuthenticated));
+    authenticationService.autoLogin();
   }
 
   get isAuthRoute(): boolean {

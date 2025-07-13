@@ -8,17 +8,13 @@ import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { storeStructure } from '../../app.config';
-import {
-  resetLoadingError,
-  signUpStart,
-} from '../../main-interface/user-profile/store/user-profile.actions';
-import {
-  selectUserProfile,
-  selectUserProfileError,
-  selectUserProfileLoading,
-} from '../../main-interface/user-profile/store/user-profile.selectors';
 import { UserProfileService } from '../../main-interface/user-profile/user-profile.service';
 import { gender } from '../../shared/types';
+import { AuthenticationService } from '../authentication.service';
+import {
+  selectAuthError,
+  selectAuthLoading,
+} from '../store/authentication.selectors';
 
 @Component({
   selector: 'app-sign-up',
@@ -49,30 +45,22 @@ export class SignUpComponent {
     private auth: Auth,
     private router: Router,
     private userProfileService: UserProfileService,
-    private store$: Store<storeStructure>
+    private store$: Store<storeStructure>,
+    private authenticationService: AuthenticationService
   ) {
-    store$.dispatch(resetLoadingError());
-    this.loading$ = store$.pipe(select(selectUserProfileLoading));
-    this.error$ = store$.pipe(select(selectUserProfileError));
-    this.loading$.subscribe((loading) => console.log('loading is ', loading));
+    this.loading$ = store$.pipe(select(selectAuthLoading));
+    this.error$ = store$.pipe(select(selectAuthError));
   }
 
   async signup() {
-    this.store$.dispatch(
-      signUpStart({
-        form: {
-          firstName: this.formData.firstName,
-          lastName: this.formData.lastName,
-          age: this.formData.age!,
-          gender: this.formData.gender as gender,
-          email: this.formData.email,
-          password: this.formData.password,
-          profilePicture: this.formData.profilePicture,
-        },
-      })
-    );
-    this.store$.pipe(select(selectUserProfile)).subscribe((up) => {
-      if (up.userProfile) this.router.navigate(['/chat-area']);
+    this.authenticationService.signUp({
+      firstName: this.formData.firstName,
+      lastName: this.formData.lastName,
+      age: this.formData.age!,
+      gender: this.formData.gender as gender,
+      email: this.formData.email,
+      password: this.formData.password,
+      profilePicture: this.formData.profilePicture,
     });
   }
 

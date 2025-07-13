@@ -5,14 +5,11 @@ import { Router, RouterLink } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { storeStructure } from '../../app.config';
+import { AuthenticationService } from '../authentication.service';
 import {
-  loginStart,
-  resetLoadingError,
-} from '../../main-interface/user-profile/store/user-profile.actions';
-import {
-  selectUserProfileError,
-  selectUserProfileLoading,
-} from '../../main-interface/user-profile/store/user-profile.selectors';
+  selectAuthError,
+  selectAuthLoading,
+} from '../store/authentication.selectors';
 
 @Component({
   selector: 'app-login',
@@ -24,15 +21,17 @@ export class LoginComponent {
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
 
-  constructor(private router: Router, private store$: Store<storeStructure>) {
-    store$.dispatch(resetLoadingError());
-    this.loading$ = store$.pipe(select(selectUserProfileLoading));
-    this.error$ = store$.pipe(select(selectUserProfileError));
+  constructor(
+    private router: Router,
+    private store$: Store<storeStructure>,
+    private authenticationService: AuthenticationService
+  ) {
+    this.loading$ = store$.pipe(select(selectAuthLoading));
+    this.error$ = store$.pipe(select(selectAuthError));
   }
 
   login(val: { email: string; password: string }) {
-    this.store$.dispatch(
-      loginStart({ email: val.email, password: val.password })
-    );
+    console.log('logging in');
+    this.authenticationService.login(val.email, val.password);
   }
 }

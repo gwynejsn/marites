@@ -10,8 +10,7 @@ export class UserProfile {
     public email: string,
     public profilePicture: string,
     public status: userStatus,
-    public lastSeen: Timestamp,
-    public chatsUID: string[]
+    public lastSeen: Timestamp
   ) {}
 
   static fromJSON(json: any): UserProfile {
@@ -36,8 +35,7 @@ export class UserProfile {
       json.email,
       json.profilePicture,
       json.status,
-      lastSeen,
-      json.chatsUID || []
+      lastSeen
     );
   }
 }

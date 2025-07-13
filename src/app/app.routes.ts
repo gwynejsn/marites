@@ -4,7 +4,7 @@ import { LoginComponent } from './authentication/login/login.component';
 import { SignUpComponent } from './authentication/sign-up/sign-up.component';
 import { HomeComponent } from './home/home.component';
 import { ChatAreaComponent } from './main-interface/chat-area/chat-area.component';
-import { FriendRequestsComponent } from './main-interface/friend-requests/friend-requests.component';
+import { FriendsComponent } from './main-interface/friends/friends.component';
 import { SettingsComponent } from './main-interface/settings/settings.component';
 import { UserProfileComponent } from './main-interface/user-profile/user-profile.component';
 import { authenticationGuard } from './shared/guards/authentication.guard';
@@ -20,8 +20,8 @@ export const routes: Routes = [
     canActivate: [authenticationGuard],
   },
   {
-    path: 'friend-requests',
-    component: FriendRequestsComponent,
+    path: 'friends',
+    component: FriendsComponent,
     canActivate: [authenticationGuard],
   },
   {

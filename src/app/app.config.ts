@@ -6,11 +6,23 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideEffects } from '@ngrx/effects';
 import { provideState, provideStore } from '@ngrx/store';
+
 import { firebase } from '../environments/firebase';
 import { routes } from './app.routes';
+import {
+  authReducer,
+  authState,
+} from './authentication/store/authentication.reducers';
+import {
+  addableUsersReducer,
+  addableUsersState,
+  friendRequestsReducer,
+  friendRequestsState,
+  friendsReducer,
+  friendsState,
+} from './main-interface/friends/store/friends.reducers';
 import { UserProfileEffects } from './main-interface/user-profile/store/user-profile.effects';
 import {
-  autoLogoutTimeoutReducer,
   userProfileReducer,
   userProfileState,
 } from './main-interface/user-profile/store/user-profile.reducers';
@@ -23,17 +35,20 @@ export const appConfig: ApplicationConfig = {
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideEffects(UserProfileEffects),
-    provideStore(),
+    provideStore<storeStructure>(),
     provideState({ name: 'userProfile', reducer: userProfileReducer }),
-    provideState({
-      name: 'autoLoginTimeout',
-      reducer: autoLogoutTimeoutReducer,
-    }),
+    provideState({ name: 'auth', reducer: authReducer }),
+    provideState({ name: 'addableFriends', reducer: addableUsersReducer }),
+    provideState({ name: 'friends', reducer: friendsReducer }),
+    provideState({ name: 'friendRequests', reducer: friendRequestsReducer }),
   ],
 };
 
 // used in selectors
 export interface storeStructure {
   userProfile: userProfileState;
-  autoLoginTimeout: any;
+  auth: authState;
+  addableFriends: addableUsersState;
+  friends: friendsState;
+  friendRequests: friendRequestsState;
 }

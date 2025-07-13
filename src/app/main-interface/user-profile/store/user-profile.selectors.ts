@@ -4,9 +4,9 @@ import { storeStructure } from '../../../app.config';
 export const selectUserProfile = (state: storeStructure) => state.userProfile;
 export const selectUserProfileLoading = createSelector(
   selectUserProfile,
-  (uf) => uf.loading
+  (userProfile) => userProfile.loading
 );
 export const selectUserProfileError = createSelector(
   selectUserProfile,
-  (uf) => uf.error
+  (userProfile) => userProfile.error
 );

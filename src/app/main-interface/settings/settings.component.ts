@@ -3,7 +3,7 @@ import { Auth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { storeStructure } from '../../app.config';
-import { logout } from '../user-profile/store/user-profile.actions';
+import { AuthenticationService } from '../../authentication/authentication.service';
 
 @Component({
   selector: 'app-settings',
@@ -15,9 +15,10 @@ export class SettingsComponent {
   constructor(
     private auth: Auth,
     private router: Router,
-    private store$: Store<storeStructure>
+    private store$: Store<storeStructure>,
+    private authenticationService: AuthenticationService
   ) {}
   logout() {
-    this.store$.dispatch(logout());
+    this.authenticationService.logout();
   }
 }
