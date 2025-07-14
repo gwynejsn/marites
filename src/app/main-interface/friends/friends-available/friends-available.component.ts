@@ -1,31 +1,106 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { UserProfile } from 'firebase/auth';
-import { FriendsService } from '../friends.service';
+import { Timestamp } from 'firebase/firestore';
+import { environment } from '../../../../environments/environment.development';
+import { UserProfile } from '../../../shared/model/user-profile.model';
+import { FriendsAvailableService } from './friends-available.service';
 
 @Component({
   selector: 'app-friends-available',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './friends-available.component.html',
-  styleUrl: './friends-available.component.css',
 })
 export class FriendsAvailableComponent {
   addableUsers: {
     id: string;
     profile: UserProfile;
   }[] = [];
-  constructor(private friendsService: FriendsService) {
+
+  loading = true;
+  error: string | null = null;
+
+  constructor(private friendsAvailableService: FriendsAvailableService) {
     this.loadAddableUsers();
+    // this.mock();
   }
+
   loadAddableUsers() {
-    // this.friendsService.getAddableUsers().subscribe((addableUsers) => {
-    //   this.addableUsers = addableUsers;
-    // });
+    this.loading = true;
+    this.friendsAvailableService.getAddableUsers().subscribe({
+      next: (addableUsers) => {
+        this.addableUsers = addableUsers;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err;
+        this.loading = false;
+      },
+    });
   }
+
   addFriend(userUID: string) {
     console.log('adding user uid: ', userUID);
-    this.friendsService.addFriend(userUID).then(() => {
-      this.loadAddableUsers(); // 👈 refresh after sending request
+    this.friendsAvailableService.addFriend(userUID).then(() => {
+      this.loadAddableUsers();
     });
+  }
+
+  mock() {
+    this.loading = false;
+    this.addableUsers = [
+      {
+        id: 'uid_101',
+        profile: new UserProfile(
+          'Justin',
+          'Gomez',
+          21,
+          'Male',
+          'email',
+          environment.defaultProfilePicture,
+          'Online',
+          Timestamp.now()
+        ),
+      },
+      {
+        id: 'uid_102',
+        profile: new UserProfile(
+          'Marianne',
+          'Lim',
+          20,
+          'Female',
+          'email',
+          environment.defaultProfilePicture,
+          'Offline',
+          Timestamp.now()
+        ),
+      },
+      {
+        id: 'uid_103',
+        profile: new UserProfile(
+          'Kevin',
+          'Yu',
+          22,
+          'Male',
+          'email',
+          environment.defaultProfilePicture,
+          'Online',
+          Timestamp.now()
+        ),
+      },
+      {
+        id: 'uid_104',
+        profile: new UserProfile(
+          'Isabelle',
+          'Tan',
+          23,
+          'Female',
+          'email',
+          environment.defaultProfilePicture,
+          'Offline',
+          Timestamp.now()
+        ),
+      },
+    ];
   }
 }

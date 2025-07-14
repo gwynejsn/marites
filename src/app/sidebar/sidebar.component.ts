@@ -7,7 +7,6 @@ import { DarkModeService } from '../shared/dark-mode.service';
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive, RouterModule, CommonModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent {
   showSidebar = signal(false);

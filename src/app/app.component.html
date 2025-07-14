@@ -4,11 +4,14 @@
 </ng-container>
 
 <ng-template #mainLayout>
-  <div class="flex">
-    <app-sidebar *ngIf="isAuthenticated$ | async"></app-sidebar>
+  <div class="flex w-screen h-screen overflow-hidden">
+    <app-sidebar
+      *ngIf="isAuthenticated$ | async"
+      class="transition-all duration-300"
+    ></app-sidebar>
 
     <div
-      class="min-h-screen min-w-screen bg-background dark:bg-background-dark text-background-dark dark:text-background flex-1"
+      class="flex-1 min-h-screen overflow-x-hidden text-background-dark dark:text-background lg:text-base sm:text-sm bg-gradient-to-r from-purple-100 via-purple-200 to-indigo-100 dark:bg-gradient-to-r dark:from-[#1a1024] dark:via-[#210c33] dark:to-[#120820]"
     >
       <router-outlet />
     </div>

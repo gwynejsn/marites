@@ -6,6 +6,5 @@ import { ListOfMessagesComponent } from './list-of-messages/list-of-messages.com
   selector: 'app-chat-area',
   imports: [ListOfMessagesComponent, ChatWindowComponent],
   templateUrl: './chat-area.component.html',
-  styleUrl: './chat-area.component.css',
 })
 export class ChatAreaComponent {}

@@ -13,14 +13,6 @@ import {
   authReducer,
   authState,
 } from './authentication/store/authentication.reducers';
-import {
-  addableUsersReducer,
-  addableUsersState,
-  friendRequestsReducer,
-  friendRequestsState,
-  friendsReducer,
-  friendsState,
-} from './main-interface/friends/store/friends.reducers';
 import { UserProfileEffects } from './main-interface/user-profile/store/user-profile.effects';
 import {
   userProfileReducer,
@@ -38,9 +30,6 @@ export const appConfig: ApplicationConfig = {
     provideStore<storeStructure>(),
     provideState({ name: 'userProfile', reducer: userProfileReducer }),
     provideState({ name: 'auth', reducer: authReducer }),
-    provideState({ name: 'addableFriends', reducer: addableUsersReducer }),
-    provideState({ name: 'friends', reducer: friendsReducer }),
-    provideState({ name: 'friendRequests', reducer: friendRequestsReducer }),
   ],
 };
 
@@ -48,7 +37,4 @@ export const appConfig: ApplicationConfig = {
 export interface storeStructure {
   userProfile: userProfileState;
   auth: authState;
-  addableFriends: addableUsersState;
-  friends: friendsState;
-  friendRequests: friendRequestsState;
 }

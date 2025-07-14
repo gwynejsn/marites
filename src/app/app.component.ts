@@ -14,7 +14,6 @@ import { SidebarComponent } from './sidebar/sidebar.component';
   selector: 'app-root',
   imports: [RouterOutlet, SidebarComponent, CommonModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
 })
 export class AppComponent {
   title = 'marites';

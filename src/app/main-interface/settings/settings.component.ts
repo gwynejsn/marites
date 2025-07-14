@@ -9,7 +9,6 @@ import { AuthenticationService } from '../../authentication/authentication.servi
   selector: 'app-settings',
   imports: [],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css',
 })
 export class SettingsComponent {
   constructor(

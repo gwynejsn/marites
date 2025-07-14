@@ -7,7 +7,6 @@ import { selectUserProfile } from './store/user-profile.selectors';
   selector: 'app-user-profile',
   imports: [],
   templateUrl: './user-profile.component.html',
-  styleUrl: './user-profile.component.css',
 })
 export class UserProfileComponent {
   constructor(private store$: Store<storeStructure>) {

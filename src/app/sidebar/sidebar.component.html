@@ -1,6 +1,9 @@
 <section
-  class="flex flex-col justify-between h-screen py-6 px-4 dark:bg-sidebar-dark drop-shadow-xl text-color-primary-dark text-md bg-sidebar"
-  [ngClass]="showSidebar() ? 'min-w-51' : ''"
+  class="flex flex-col justify-between h-screen py-6 px-4 bg-sidebar dark:bg-sidebar-dark drop-shadow-xl text-color-primary-dark text-md"
+  [ngClass]="{
+    'w-[200px]': showSidebar(),
+    'w-[80px]': !showSidebar()
+  }"
 >
   <div class="flex flex-col gap-2">
     <button
