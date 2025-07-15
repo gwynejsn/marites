@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-import { chatMember, chatType } from '../types';
+import { chatMember, chatType, userStatus } from '../types';
 
 export class Chat {
   constructor(
@@ -8,7 +8,8 @@ export class Chat {
     public chatName: string | null,
     public chatPhoto: string | null,
     public quickReaction: string,
-    public backgroundColor: string,
+    public backgroundColor: string | null,
+    public status: userStatus,
     public members: chatMember[]
   ) {}
 }

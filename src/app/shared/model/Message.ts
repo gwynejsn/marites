@@ -5,6 +5,7 @@ export class Message {
   constructor(
     public type: messageType,
     public senderUID: string,
+    public senderProfilePicture: string,
     public senderName: string,
     public senderNickName: string,
     public timestamp: Timestamp,

@@ -1,0 +1,60 @@
+<div
+  class="w-full flex items-start gap-2 mb-2"
+  [ngClass]="{
+    'justify-end ': isUser,
+    'justify-start': !isUser
+  }"
+>
+  <!-- Profile Picture (only for others) -->
+  <img
+    *ngIf="!isUser"
+    [src]="message.senderProfilePicture"
+    [alt]="message.senderName"
+    class="w-8 h-8 rounded-full object-cover mt-1"
+  />
+
+  <!-- Message Content -->
+  <div class="flex flex-col items-start max-w-[75%]">
+    <!-- Nickname for Group Chats -->
+    <p
+      *ngIf="!isUser && chatType === 'Group'"
+      class="text-xs text-gray-500 dark:text-gray-400 mb-1"
+    >
+      {{ message.senderNickName }}
+    </p>
+
+    <!-- Message Types -->
+    <ng-container [ngSwitch]="message.type">
+      <!-- Text Message -->
+      <div
+        *ngSwitchCase="'Text'"
+        class="p-3 rounded-2xl text-sm break-words"
+        [ngClass]="{
+          'bg-primary text-white dark:bg-primary-dark self-end': isUser,
+          'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-white': !isUser
+        }"
+      >
+        {{ message.text }}
+      </div>
+
+      <!-- Image Message -->
+      <img
+        *ngSwitchCase="'Image'"
+        [src]="message.mediaUrl"
+        alt="Sent image"
+        class="rounded-2xl max-w-xs object-cover"
+      />
+
+      <!-- File Message -->
+      <a
+        *ngSwitchCase="'File'"
+        [href]="message.mediaUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-blue-600 dark:text-blue-400 text-sm break-words"
+      >
+        📎 Click to open file
+      </a>
+    </ng-container>
+  </div>
+</div>
