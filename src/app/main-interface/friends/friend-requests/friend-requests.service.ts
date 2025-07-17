@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Auth, authState, User } from '@angular/fire/auth';
 import {
   collection,
   deleteDoc,
@@ -12,6 +11,7 @@ import { select, Store } from '@ngrx/store';
 import { arrayRemove, doc } from 'firebase/firestore';
 import { firstValueFrom, Observable, switchMap, throwError } from 'rxjs';
 import { storeStructure } from '../../../app.config';
+import { selectCurrUserUID } from '../../../authentication/store/authentication.selectors';
 import { FriendRequest } from '../../../shared/model/friend-request.model';
 import { Friend } from '../../../shared/model/friend.model';
 import { UserProfile } from '../../../shared/model/user-profile.model';
@@ -20,16 +20,13 @@ import { selectUserProfile } from '../../user-profile/store/user-profile.selecto
 
 @Injectable({ providedIn: 'root' })
 export class FriendRequestsService {
-  private authState$: Observable<User | null>;
   private userProfile: UserProfile | null = null;
 
   constructor(
-    private auth: Auth,
     private firestore: Firestore,
     private store$: Store<storeStructure>,
     private chatService: ChatService
   ) {
-    this.authState$ = authState(auth);
     store$.pipe(select(selectUserProfile)).subscribe((up) => {
       this.userProfile = up.userProfile;
     });
@@ -38,16 +35,17 @@ export class FriendRequestsService {
   getFriendRequests(): Observable<
     { id: string; friendRequest: FriendRequest }[]
   > {
-    return this.authState$.pipe(
-      switchMap((user) => {
-        if (!user) {
+    return this.store$.pipe(
+      select(selectCurrUserUID),
+      switchMap((userUID) => {
+        if (!userUID) {
           return throwError(() => new Error('User not authenticated'));
         }
 
         const colRef = collection(
           this.firestore,
           'users',
-          user.uid,
+          userUID,
           'friendRequests'
         );
 
@@ -77,25 +75,28 @@ export class FriendRequestsService {
     name: string,
     profilePicture: string
   ): Promise<void> {
-    const user = await firstValueFrom(this.authState$);
-    if (user && this.userProfile) {
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+
+    if (userUID && this.userProfile) {
       // add to my friends
-      await setDoc(doc(this.firestore, `users/${user.uid}/friends/${UID}`), {
+      await setDoc(doc(this.firestore, `users/${userUID}/friends/${UID}`), {
         ...new Friend(UID, name, profilePicture),
       });
       // add to his friends
       const fullName =
         this.userProfile.firstName + ' ' + this.userProfile.lastName;
-      await setDoc(doc(this.firestore, `users/${UID}/friends/${user.uid}`), {
-        ...new Friend(user.uid, fullName, this.userProfile.profilePicture),
+      await setDoc(doc(this.firestore, `users/${UID}/friends/${userUID}`), {
+        ...new Friend(userUID, fullName, this.userProfile.profilePicture),
       });
       // remove from my friend requests
       await deleteDoc(
-        doc(this.firestore, `users/${user.uid}/friendRequests/${UID}`)
+        doc(this.firestore, `users/${userUID}/friendRequests/${UID}`)
       );
       // remove from their sent requests
       await deleteDoc(
-        doc(this.firestore, `users/${UID}/sentFriendRequests/${user.uid}`)
+        doc(this.firestore, `users/${UID}/sentFriendRequests/${userUID}`)
       );
 
       // create a chat to this person
@@ -106,24 +107,27 @@ export class FriendRequestsService {
   }
 
   async rejectRequest(UID: string): Promise<void> {
-    const user = await firstValueFrom(this.authState$);
-    if (user && this.userProfile) {
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+
+    if (userUID && this.userProfile) {
       // remove from my friend requests
       await deleteDoc(
-        doc(this.firestore, `users/${user.uid}/friendRequests/${UID}`)
+        doc(this.firestore, `users/${userUID}/friendRequests/${UID}`)
       );
       // remove from their sent requests
       await deleteDoc(
-        doc(this.firestore, `users/${UID}/sentFriendRequests/${user.uid}`)
+        doc(this.firestore, `users/${UID}/sentFriendRequests/${userUID}`)
       );
 
       // remove to my blacklist his UID
-      await updateDoc(doc(this.firestore, `users/${user.uid}`), {
+      await updateDoc(doc(this.firestore, `users/${userUID}`), {
         friendSuggestionsBlacklist: arrayRemove(UID),
       });
       // remove to his blacklist my UID
       await updateDoc(doc(this.firestore, `users/${UID}`), {
-        friendSuggestionsBlacklist: arrayRemove(user.uid),
+        friendSuggestionsBlacklist: arrayRemove(userUID),
       });
     }
   }

@@ -41,7 +41,7 @@ export class AuthenticationService {
     this.store$.dispatch(signUpStart()); // set loading to true
     try {
       // create acc
-      await createUserWithEmailAndPassword(
+      const accCreatedRef = await createUserWithEmailAndPassword(
         this.auth,
         form.email,
         form.password
@@ -49,7 +49,6 @@ export class AuthenticationService {
 
       // create user profile
       let imgUrl;
-      console.log('with pf' + form.profilePicture);
       if (form.profilePicture)
         imgUrl = await this.userProfileService.uploadProfilePicture(
           form.profilePicture
@@ -70,7 +69,7 @@ export class AuthenticationService {
 
       // upload user profile
       await this.userProfileService.addUserProfile(newUserProfile);
-      this.store$.dispatch(signUpSuccess()); // set loading to false
+      this.store$.dispatch(signUpSuccess({ uid: accCreatedRef.user.uid })); // set loading to false
       this.router.navigate(['/chat-area']);
     } catch (err: any) {
       this.store$.dispatch(
@@ -96,16 +95,15 @@ export class AuthenticationService {
 
   async login(email: string, password: string): Promise<void> {
     try {
-      const loggedIn = await signInWithEmailAndPassword(
+      const loggedInRef = await signInWithEmailAndPassword(
         this.auth,
         email,
         password
       );
-      console.log(loggedIn);
 
       // get user and set profile
       await this.userProfileService.loadUserProfile();
-      this.store$.dispatch(loginSuccess());
+      this.store$.dispatch(loginSuccess({ uid: loggedInRef.user.uid }));
       this.router.navigate(['/chat-area']);
     } catch (err: any) {
       this.store$.dispatch(
@@ -116,10 +114,9 @@ export class AuthenticationService {
 
   async autoLogin(): Promise<void> {
     const user = await firstValueFrom(this.authState$);
-    console.log(user);
     if (user) {
       // change isAuthenticated
-      this.store$.dispatch(loginSuccess());
+      this.store$.dispatch(loginSuccess({ uid: user.uid }));
       // load profile
       await this.userProfileService.autoLoadUserProfile();
     }

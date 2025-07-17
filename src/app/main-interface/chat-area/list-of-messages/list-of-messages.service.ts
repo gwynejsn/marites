@@ -1,22 +1,22 @@
 import { Injectable } from '@angular/core';
-import { Auth, authState } from '@angular/fire/auth';
 import {
   addDoc,
   collection,
   Firestore,
   onSnapshot,
 } from '@angular/fire/firestore';
-import { User } from 'firebase/auth';
+import { select, Store } from '@ngrx/store';
 import { Observable, switchMap, throwError } from 'rxjs';
+import { storeStructure } from '../../../app.config';
+import { selectCurrUserUID } from '../../../authentication/store/authentication.selectors';
 import { MessagePreview } from '../../../shared/model/message-preview';
 
 @Injectable({ providedIn: 'root' })
 export class ListOfMessagesService {
-  private authState$: Observable<User | null>;
-
-  constructor(private firestore: Firestore, private auth: Auth) {
-    this.authState$ = authState(auth);
-  }
+  constructor(
+    private firestore: Firestore,
+    private store$: Store<storeStructure>
+  ) {}
 
   getMessagesPreviews(): Observable<
     {
@@ -24,15 +24,16 @@ export class ListOfMessagesService {
       preview: MessagePreview;
     }[]
   > {
-    return this.authState$.pipe(
-      switchMap((user) => {
-        if (!user) {
+    return this.store$.pipe(
+      select(selectCurrUserUID),
+      switchMap((userUID) => {
+        if (!userUID) {
           return throwError(() => new Error('User not authenticated'));
         }
 
         const colRef = collection(
           this.firestore,
-          `users/${user.uid}/messagesPreview`
+          `users/${userUID}/messagesPreview`
         );
 
         return new Observable<{ id: string; preview: MessagePreview }[]>(

@@ -1,19 +1,26 @@
 import { Injectable } from '@angular/core';
-import { Auth, authState } from '@angular/fire/auth';
-import { Firestore, collection, onSnapshot } from '@angular/fire/firestore';
+import { collection, Firestore, onSnapshot } from '@angular/fire/firestore';
+import { select, Store } from '@ngrx/store';
 import { Observable, switchMap, throwError } from 'rxjs';
+import { storeStructure } from '../../app.config';
+import { selectCurrUserUID } from '../../authentication/store/authentication.selectors';
 import { Friend } from '../../shared/model/friend.model';
 
 @Injectable({ providedIn: 'root' })
 export class FriendsService {
-  constructor(private auth: Auth, private firestore: Firestore) {}
+  constructor(
+    private firestore: Firestore,
+    private store$: Store<storeStructure>
+  ) {}
 
   getFriends(): Observable<{ id: string; friend: Friend }[]> {
-    return authState(this.auth).pipe(
-      switchMap((user) => {
-        if (!user) return throwError(() => new Error('User not authenticated'));
+    return this.store$.pipe(
+      select(selectCurrUserUID),
+      switchMap((userUID) => {
+        if (!userUID)
+          return throwError(() => new Error('User not authenticated'));
 
-        const ref = collection(this.firestore, `users/${user.uid}/friends`);
+        const ref = collection(this.firestore, `users/${userUID}/friends`);
 
         return new Observable<{ id: string; friend: Friend }[]>(
           (subscriber) => {

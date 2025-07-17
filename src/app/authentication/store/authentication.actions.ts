@@ -2,7 +2,10 @@ import { createAction, props } from '@ngrx/store';
 
 export const signUpStart = createAction('[auth] sign up start');
 
-export const signUpSuccess = createAction('[auth] sign up success');
+export const signUpSuccess = createAction(
+  '[auth] sign up success',
+  props<{ uid: string }>()
+);
 
 export const signUpFailure = createAction(
   '[auth] sign up failure',
@@ -14,7 +17,10 @@ export const loginStart = createAction(
   props<{ email: string; password: string }>()
 );
 
-export const loginSuccess = createAction('[auth] login success');
+export const loginSuccess = createAction(
+  '[auth] login success',
+  props<{ uid: string }>()
+);
 
 export const loginFailure = createAction(
   '[auth] login failure',

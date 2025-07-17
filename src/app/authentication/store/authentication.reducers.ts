@@ -14,22 +14,25 @@ export type authState = {
   loading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  currUserUID: string | null;
 };
 
 export const authInitialValues: authState = {
   loading: false,
   error: null,
   isAuthenticated: false,
+  currUserUID: null,
 };
 
 export const authReducer = createReducer(
   authInitialValues,
   // sign up
   on(signUpStart, (state) => ({ ...state, loading: true })),
-  on(signUpSuccess, (state) => ({
+  on(signUpSuccess, (state, { uid }) => ({
     ...state,
     isAuthenticated: true,
     loading: false,
+    currUserUID: uid,
   })),
   on(signUpFailure, (state, { error }) => ({
     ...state,
@@ -39,10 +42,11 @@ export const authReducer = createReducer(
 
   // login
   on(loginStart, (state) => ({ ...state, loading: true })),
-  on(loginSuccess, (state) => ({
+  on(loginSuccess, (state, { uid }) => ({
     ...state,
     isAuthenticated: true,
     loading: false,
+    currUserUID: uid,
   })),
   on(loginFailure, (state, { error }) => ({
     ...state,
@@ -55,6 +59,7 @@ export const authReducer = createReducer(
     ...state,
     isAuthenticated: false,
     loading: false,
+    currUserUID: null,
   })),
   on(logoutFailure, (state, { error }) => ({
     ...state,

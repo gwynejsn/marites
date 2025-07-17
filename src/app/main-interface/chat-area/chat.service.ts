@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Auth, authState, User } from '@angular/fire/auth';
 import {
   addDoc,
   collection,
@@ -7,9 +6,10 @@ import {
   Timestamp,
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { storeStructure } from '../../app.config';
+import { selectCurrUserUID } from '../../authentication/store/authentication.selectors';
 import { Chat } from '../../shared/model/chat.model';
 import { Message } from '../../shared/model/message';
 import { MessagePreview } from '../../shared/model/message-preview';
@@ -19,16 +19,13 @@ import { ListOfMessagesService } from './list-of-messages/list-of-messages.servi
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private authState$: Observable<User | null>;
   private userProfile: UserProfile | null = null;
 
   constructor(
-    private auth: Auth,
     private firestore: Firestore,
     private store$: Store<storeStructure>,
     private listOfMessagesService: ListOfMessagesService
   ) {
-    this.authState$ = authState(this.auth);
     store$.pipe(select(selectUserProfile)).subscribe((up) => {
       this.userProfile = up.userProfile;
     });
@@ -39,11 +36,11 @@ export class ChatService {
     name: string,
     profilePicture: string
   ): Promise<void> {
-    console.log('[createPrivateChat] called');
-
-    const user = await firstValueFrom(this.authState$);
-    if (!user) throw new Error('User not authenticated');
-    if (!this.userProfile) throw new Error('User profile not loaded');
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+    if (!userUID || !this.userProfile)
+      throw new Error('User not authenticated');
 
     const currUserName =
       this.userProfile.firstName + ' ' + this.userProfile.lastName;
@@ -58,15 +55,13 @@ export class ChatService {
       'Online',
       {
         [withUID]: { name, nickname: name },
-        [user.uid]: { name: currUserName, nickname: currUserName },
+        [userUID]: { name: currUserName, nickname: currUserName },
       }
     );
 
     const chatRef = await addDoc(collection(this.firestore, 'chats'), {
       ...chatCreated,
     });
-    console.log('chat created:');
-    console.log(chatRef);
 
     // create a preview of this chat
     await this.listOfMessagesService.createPrivateMessagePreview(
@@ -88,7 +83,7 @@ export class ChatService {
         chatCreated.status,
         []
       ),
-      user.uid,
+      userUID,
       withUID
     );
   }
