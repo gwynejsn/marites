@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { Friend } from '../../shared/model/friend.model';
 import { FriendRequestsComponent } from './friend-requests/friend-requests.component';
@@ -12,7 +13,7 @@ import { FriendsService } from './friends.service';
   imports: [FriendRequestsComponent, FriendsAvailableComponent, CommonModule],
   templateUrl: './friends.component.html',
 })
-export class FriendsComponent {
+export class FriendsComponent implements OnDestroy {
   friends: {
     id: string;
     friend: Friend;
@@ -20,15 +21,20 @@ export class FriendsComponent {
 
   loading = true;
   error: string | null = null;
+  friendsSub!: Subscription;
 
   constructor(private friendsService: FriendsService) {
     this.loadFriends();
     // this.mock();
   }
 
+  ngOnDestroy(): void {
+    this.friendsSub.unsubscribe();
+  }
+
   loadFriends() {
     this.loading = true;
-    this.friendsService.getFriends().subscribe({
+    this.friendsSub = this.friendsService.getFriends().subscribe({
       next: (friends) => {
         this.friends = friends;
         this.loading = false;

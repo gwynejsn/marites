@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Timestamp } from 'firebase/firestore';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 import { FriendRequest } from '../../../shared/model/friend-request.model';
 import { FriendRequestsService } from './friend-requests.service';
@@ -11,7 +12,7 @@ import { FriendRequestsService } from './friend-requests.service';
   imports: [CommonModule],
   templateUrl: './friend-requests.component.html',
 })
-export class FriendRequestsComponent {
+export class FriendRequestsComponent implements OnDestroy {
   friendRequests: {
     id: string;
     friendRequest: FriendRequest;
@@ -19,25 +20,32 @@ export class FriendRequestsComponent {
   loading = true;
   error: string | null = null;
 
+  friendRequestsSub!: Subscription;
+
   constructor(private friendRequestsService: FriendRequestsService) {
     this.loadFriendRequests();
     // this.mock();
   }
-  loadFriendRequests() {
-    this.loading = true;
-    this.friendRequestsService.getFriendRequests().subscribe({
-      next: (friendRequests) => {
-        this.friendRequests = friendRequests;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = err;
-        this.loading = false;
-      },
-    });
+
+  ngOnDestroy(): void {
+    this.friendRequestsSub.unsubscribe();
   }
 
-  @Output() reloadFriends = new EventEmitter();
+  loadFriendRequests() {
+    this.loading = true;
+    this.friendRequestsSub = this.friendRequestsService
+      .getFriendRequests()
+      .subscribe({
+        next: (friendRequests) => {
+          this.friendRequests = friendRequests;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = err;
+          this.loading = false;
+        },
+      });
+  }
 
   acceptRequest(UID: string, name: string, profilePicture: string) {
     this.friendRequestsService
@@ -45,7 +53,7 @@ export class FriendRequestsComponent {
       .then(() => {
         this.loadFriendRequests();
         // reload friends
-        this.reloadFriends.emit();
+        // this.reloadFriends.emit();
       });
   }
 

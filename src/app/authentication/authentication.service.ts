@@ -48,15 +48,13 @@ export class AuthenticationService {
       );
 
       // create user profile
-      let imgUrl = environment.defaultProfilePicture;
-      /**
-       * 🌩️ Cloudinary Integration
-       * In production, uncomment the code below to upload the profile picture to Cloudinary.
-       *
-       * if (profilePicture) {
-       *   imgUrl = await this.userProfileService.uploadProfilePicture(profilePicture);
-       * }
-       */
+      let imgUrl;
+      console.log('with pf' + form.profilePicture);
+      if (form.profilePicture)
+        imgUrl = await this.userProfileService.uploadProfilePicture(
+          form.profilePicture
+        );
+      else imgUrl = environment.defaultProfilePicture;
 
       const newUserProfile = new UserProfile(
         form.firstName,
@@ -64,9 +62,10 @@ export class AuthenticationService {
         form.age!,
         form.gender as gender,
         form.email,
-        imgUrl,
+        imgUrl!,
         'Online',
-        Timestamp.now()
+        Timestamp.now(),
+        []
       );
 
       // upload user profile

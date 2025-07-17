@@ -1,12 +1,13 @@
 export type gender = 'Male' | 'Female' | 'Other';
-export type userStatus = 'Online' | 'Offline';
+export type status = 'Online' | 'Offline';
 export type messageType = 'File' | 'Text' | 'Image';
 export type chatType = 'Group' | 'Private';
 export type userProfileStatus = 'uploading' | 'fetching' | 'fetched' | 'init';
-export type chatMember = {
-  name: string;
-  nickname: string;
-  UID: string;
+export type chatMemberMap = {
+  [uid: string]: {
+    name: string;
+    nickname: string;
+  };
 };
 export type signUpForm = {
   firstName: string;

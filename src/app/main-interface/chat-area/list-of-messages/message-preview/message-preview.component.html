@@ -4,7 +4,7 @@
   <div class="relative">
     <!-- Avatar -->
     <img
-      [src]="messagePreview.profilePicture"
+      [src]="messagePreview.chatPhoto"
       [alt]="messagePreview.chatName"
       class="w-[60px] h-[60px] rounded-full object-cover"
     />
@@ -20,8 +20,8 @@
     <div class="flex justify-between items-center w-full">
       <p
         [ngClass]="{
-          'font-bold text-gray-900 dark:text-white': !messagePreview.read,
-          'font-medium text-gray-700 dark:text-gray-300': messagePreview.read
+          'font-bold text-gray-900 dark:text-white': read,
+          'font-medium text-gray-700 dark:text-gray-300': read
         }"
       >
         {{ messagePreview.chatName }}
@@ -33,11 +33,11 @@
 
     <!-- Message Preview Line -->
     <div
-      [ngClass]="{
-        'text-gray-800 dark:text-gray-200 font-semibold': !messagePreview.read,
-        'text-gray-600 dark:text-gray-400': messagePreview.read
-      }"
       class="flex text-sm overflow-hidden whitespace-nowrap"
+      [ngClass]="{
+        'text-gray-800 dark:text-gray-200 font-semibold': read,
+        'text-gray-600 dark:text-gray-400': read
+      }"
     >
       <ng-container
         *ngIf="messagePreview.lastMessage.type === 'Text'; else media"
@@ -50,13 +50,21 @@
         >
           {{ messagePreview.lastMessage.senderNickName }}:
         </span>
-        <span
-          *ngIf="messagePreview.lastMessage.text.length < 20; else longMessage"
-        >
-          {{ messagePreview.lastMessage.text }}
-        </span>
-        <ng-template #longMessage>
-          {{ messagePreview.lastMessage.text.slice(0, 20) }}...
+        <div *ngIf="!messagePreview.lastMessage.empty; else emptyMessage">
+          <span
+            *ngIf="
+              messagePreview.lastMessage.text.length < 20;
+              else longMessage
+            "
+          >
+            {{ messagePreview.lastMessage.text }}
+          </span>
+          <ng-template #longMessage>
+            {{ messagePreview.lastMessage.text.slice(0, 20) }}...
+          </ng-template>
+        </div>
+        <ng-template #emptyMessage>
+          Say hi to start the conversation!
         </ng-template>
       </ng-container>
 

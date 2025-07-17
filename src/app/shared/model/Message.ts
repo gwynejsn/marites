@@ -9,9 +9,38 @@ export class Message {
     public senderName: string,
     public senderNickName: string,
     public timestamp: Timestamp,
-    // if messageType is text
     public text: string,
-    // if messageType is file or image
-    public mediaUrl: string
+    public mediaUrl: string,
+    public empty: boolean
   ) {}
+
+  static fromJSON(json: any): Message {
+    return new Message(
+      json.type as messageType,
+      json.senderUID,
+      json.senderProfilePicture,
+      json.senderName,
+      json.senderNickName,
+      json.timestamp instanceof Timestamp
+        ? json.timestamp
+        : Timestamp.fromMillis(json.timestamp?.seconds * 1000 || 0),
+      json.text || '',
+      json.mediaUrl || '',
+      json.empty
+    );
+  }
+
+  toFirestore(): object {
+    return {
+      type: this.type,
+      senderUID: this.senderUID,
+      senderProfilePicture: this.senderProfilePicture,
+      senderName: this.senderName,
+      senderNickName: this.senderNickName,
+      timestamp: this.timestamp,
+      text: this.text,
+      mediaUrl: this.mediaUrl,
+      empty: this.empty,
+    };
+  }
 }

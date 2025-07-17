@@ -1,28 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Auth, authState, User } from '@angular/fire/auth';
 import {
+  arrayUnion,
   collection,
   doc,
   Firestore,
-  getDocs,
+  onSnapshot,
   serverTimestamp,
   setDoc,
   Timestamp,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
-import {
-  firstValueFrom,
-  forkJoin,
-  from,
-  map,
-  Observable,
-  switchMap,
-  throwError,
-} from 'rxjs';
+import { firstValueFrom, Observable, switchMap, throwError } from 'rxjs';
 import { storeStructure } from '../../../app.config';
 import { FriendRequest } from '../../../shared/model/friend-request.model';
 import { UserProfile } from '../../../shared/model/user-profile.model';
 import { selectUserProfile } from '../../user-profile/store/user-profile.selectors';
+import { FriendRequestsService } from '../friend-requests/friend-requests.service';
+import { FriendsService } from '../friends.service';
 
 @Injectable({ providedIn: 'root' })
 export class FriendsAvailableService {
@@ -32,7 +28,9 @@ export class FriendsAvailableService {
   constructor(
     private auth: Auth,
     private firestore: Firestore,
-    private store$: Store<storeStructure>
+    private store$: Store<storeStructure>,
+    private friendRequestsService: FriendRequestsService,
+    private friendsService: FriendsService
   ) {
     this.authState$ = authState(auth);
     store$.pipe(select(selectUserProfile)).subscribe((up) => {
@@ -52,53 +50,31 @@ export class FriendsAvailableService {
           return throwError(() => new Error('User not authenticated'));
         }
 
-        // angular fire observables
-        const users$ = from(getDocs(collection(this.firestore, 'users')));
-        const sentFriendRequests$ = from(
-          getDocs(
-            collection(this.firestore, 'users', user.uid, 'sentFriendRequests')
-          )
-        );
-        const receivedFriendRequests$ = from(
-          getDocs(
-            collection(this.firestore, 'users', user.uid, 'friendRequests')
-          )
-        );
-        const currentFriends$ = from(
-          getDocs(collection(this.firestore, 'users', user.uid, 'friends'))
-        );
+        const usersColRef = collection(this.firestore, 'users');
 
-        return forkJoin([
-          users$,
-          sentFriendRequests$,
-          receivedFriendRequests$,
-          currentFriends$,
-        ]).pipe(
-          map(([usersSnap, sentSnap, receivedSnap, friendsSnap]) => {
-            const currentUserId = user.uid;
+        return new Observable<{ id: string; profile: UserProfile }[]>(
+          (subscriber) => {
+            const usersUnsubscribe = onSnapshot(
+              usersColRef,
+              (snapshot) => {
+                const filteredUsers = snapshot.docs
+                  .map((request) => ({
+                    id: request.id,
+                    profile: UserProfile.fromJSON(request.data()),
+                  }))
+                  .filter(
+                    (p) =>
+                      !p.profile.friendSuggestionsBlacklist?.includes(
+                        user.uid
+                      ) && p.id !== user.uid
+                  );
+                subscriber.next(filteredUsers);
+              },
+              (error) => subscriber.error(error)
+            );
 
-            const sentTo = sentSnap.docs
-              .filter((doc) => doc.ref.parent.parent?.id === currentUserId) // your sent requests
-              .map((doc) => doc.id);
-
-            const receivedFrom = receivedSnap.docs.map((doc) => doc.id);
-
-            const friends = friendsSnap.docs.map((doc) => doc.id);
-
-            const blacklist = new Set<string>([
-              currentUserId,
-              ...sentTo,
-              ...receivedFrom,
-              ...friends,
-            ]);
-
-            return usersSnap.docs
-              .filter((doc) => !blacklist.has(doc.id))
-              .map((doc) => ({
-                id: doc.id,
-                profile: UserProfile.fromJSON(doc.data()),
-              }));
-          })
+            return usersUnsubscribe;
+          }
         );
       })
     );
@@ -119,7 +95,6 @@ export class FriendsAvailableService {
           Timestamp.now()
         );
         // get reference to who i will send
-
         const requestDocRef = doc(
           this.firestore,
           `users/${UID}/friendRequests/${user.uid}`
@@ -135,6 +110,16 @@ export class FriendsAvailableService {
             createdAt: serverTimestamp(),
           }
         );
+
+        // add to his blacklist my UID
+        await updateDoc(doc(this.firestore, `users/${user.uid}`), {
+          friendSuggestionsBlacklist: arrayUnion(UID),
+        });
+        // add to my blacklist his UID
+        await updateDoc(doc(this.firestore, `users/${UID}`), {
+          friendSuggestionsBlacklist: arrayUnion(user.uid),
+        });
+
         // TODO: throw an error and handle in template
       } catch (err) {
         console.log(err);

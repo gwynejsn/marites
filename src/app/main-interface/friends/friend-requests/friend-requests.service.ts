@@ -4,23 +4,18 @@ import {
   collection,
   deleteDoc,
   Firestore,
-  getDocs,
+  onSnapshot,
   setDoc,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
-import { doc } from 'firebase/firestore';
-import {
-  firstValueFrom,
-  from,
-  map,
-  Observable,
-  switchMap,
-  throwError,
-} from 'rxjs';
+import { arrayRemove, doc } from 'firebase/firestore';
+import { firstValueFrom, Observable, switchMap, throwError } from 'rxjs';
 import { storeStructure } from '../../../app.config';
 import { FriendRequest } from '../../../shared/model/friend-request.model';
 import { Friend } from '../../../shared/model/friend.model';
 import { UserProfile } from '../../../shared/model/user-profile.model';
+import { ChatService } from '../../chat-area/chat.service';
 import { selectUserProfile } from '../../user-profile/store/user-profile.selectors';
 
 @Injectable({ providedIn: 'root' })
@@ -31,7 +26,8 @@ export class FriendRequestsService {
   constructor(
     private auth: Auth,
     private firestore: Firestore,
-    private store$: Store<storeStructure>
+    private store$: Store<storeStructure>,
+    private chatService: ChatService
   ) {
     this.authState$ = authState(auth);
     store$.pipe(select(selectUserProfile)).subscribe((up) => {
@@ -55,16 +51,22 @@ export class FriendRequestsService {
           'friendRequests'
         );
 
-        return from(getDocs(colRef)).pipe(
-          map((snapshot) => {
-            const requests = snapshot.docs.map((request) => {
-              return {
-                id: request.id,
-                friendRequest: FriendRequest.fromJSON(request.data()),
-              };
-            });
-            return requests;
-          })
+        return new Observable<{ id: string; friendRequest: FriendRequest }[]>(
+          (subscriber) => {
+            const unsubscribe = onSnapshot(
+              colRef,
+              (snapshot) => {
+                const requests = snapshot.docs.map((request) => ({
+                  id: request.id,
+                  friendRequest: FriendRequest.fromJSON(request.data()),
+                }));
+                subscriber.next(requests);
+              },
+              (error) => subscriber.error(error)
+            );
+
+            return unsubscribe;
+          }
         );
       })
     );
@@ -95,6 +97,11 @@ export class FriendRequestsService {
       await deleteDoc(
         doc(this.firestore, `users/${UID}/sentFriendRequests/${user.uid}`)
       );
+
+      // create a chat to this person
+      console.log('calling chat service create chat');
+
+      await this.chatService.createPrivateChat(UID, name, profilePicture);
     }
   }
 
@@ -109,6 +116,15 @@ export class FriendRequestsService {
       await deleteDoc(
         doc(this.firestore, `users/${UID}/sentFriendRequests/${user.uid}`)
       );
+
+      // remove to my blacklist his UID
+      await updateDoc(doc(this.firestore, `users/${user.uid}`), {
+        friendSuggestionsBlacklist: arrayRemove(UID),
+      });
+      // remove to his blacklist my UID
+      await updateDoc(doc(this.firestore, `users/${UID}`), {
+        friendSuggestionsBlacklist: arrayRemove(user.uid),
+      });
     }
   }
 }

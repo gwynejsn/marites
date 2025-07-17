@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-import { gender, userStatus } from '../types';
+import { gender, status } from '../types';
 
 export class UserProfile {
   constructor(
@@ -9,8 +9,9 @@ export class UserProfile {
     public gender: gender,
     public email: string,
     public profilePicture: string,
-    public status: userStatus,
-    public lastSeen: Timestamp
+    public status: status,
+    public lastSeen: Timestamp,
+    public friendSuggestionsBlacklist: string[]
   ) {}
 
   static fromJSON(json: any): UserProfile {
@@ -35,7 +36,8 @@ export class UserProfile {
       json.email,
       json.profilePicture,
       json.status,
-      lastSeen
+      lastSeen,
+      json.friendSuggestionsBlacklist
     );
   }
 }

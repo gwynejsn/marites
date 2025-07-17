@@ -73,10 +73,7 @@
     <app-friends-available
       class="h-[30vh] overflow-y-auto"
     ></app-friends-available>
-    <app-friend-requests
-      class="h-[30vh] overflow-y-auto"
-      (reloadFriends)="loadFriends()"
-    ></app-friend-requests>
+    <app-friend-requests class="h-[30vh] overflow-y-auto"></app-friend-requests>
   </div>
 
   <!-- Grouped for medium screens -->
@@ -86,7 +83,6 @@
     ></app-friends-available>
     <app-friend-requests
       class="flex-1 h-full max-h-[50%]"
-      (reloadFriends)="loadFriends()"
     ></app-friend-requests>
   </div>
 
@@ -96,6 +92,5 @@
   ></app-friends-available>
   <app-friend-requests
     class="hidden lg:flex flex-1 h-full"
-    (reloadFriends)="loadFriends()"
   ></app-friend-requests>
 </div>

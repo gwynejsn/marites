@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Timestamp } from 'firebase/firestore';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 import { UserProfile } from '../../../shared/model/user-profile.model';
 import { FriendsAvailableService } from './friends-available.service';
@@ -11,7 +12,7 @@ import { FriendsAvailableService } from './friends-available.service';
   imports: [CommonModule],
   templateUrl: './friends-available.component.html',
 })
-export class FriendsAvailableComponent {
+export class FriendsAvailableComponent implements OnDestroy {
   addableUsers: {
     id: string;
     profile: UserProfile;
@@ -20,23 +21,31 @@ export class FriendsAvailableComponent {
   loading = true;
   error: string | null = null;
 
+  friendsAvailableSub!: Subscription;
+
   constructor(private friendsAvailableService: FriendsAvailableService) {
     this.loadAddableUsers();
     // this.mock();
   }
 
+  ngOnDestroy(): void {
+    this.friendsAvailableSub.unsubscribe();
+  }
+
   loadAddableUsers() {
     this.loading = true;
-    this.friendsAvailableService.getAddableUsers().subscribe({
-      next: (addableUsers) => {
-        this.addableUsers = addableUsers;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = err;
-        this.loading = false;
-      },
-    });
+    this.friendsAvailableSub = this.friendsAvailableService
+      .getAddableUsers()
+      .subscribe({
+        next: (addableUsers) => {
+          this.addableUsers = addableUsers;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = err;
+          this.loading = false;
+        },
+      });
   }
 
   addFriend(userUID: string) {
@@ -59,7 +68,8 @@ export class FriendsAvailableComponent {
           'email',
           environment.defaultProfilePicture,
           'Online',
-          Timestamp.now()
+          Timestamp.now(),
+          []
         ),
       },
       {
@@ -72,7 +82,8 @@ export class FriendsAvailableComponent {
           'email',
           environment.defaultProfilePicture,
           'Offline',
-          Timestamp.now()
+          Timestamp.now(),
+          []
         ),
       },
       {
@@ -85,7 +96,8 @@ export class FriendsAvailableComponent {
           'email',
           environment.defaultProfilePicture,
           'Online',
-          Timestamp.now()
+          Timestamp.now(),
+          []
         ),
       },
       {
@@ -98,7 +110,8 @@ export class FriendsAvailableComponent {
           'email',
           environment.defaultProfilePicture,
           'Offline',
-          Timestamp.now()
+          Timestamp.now(),
+          []
         ),
       },
     ];
