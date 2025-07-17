@@ -28,6 +28,7 @@
       *ngFor="let messagePreview of messages"
       [messagePreview]="messagePreview"
       class="w-full"
+      (click)="chatService.selectChat(messagePreview.chatUID)"
     >
     </app-message-preview>
 

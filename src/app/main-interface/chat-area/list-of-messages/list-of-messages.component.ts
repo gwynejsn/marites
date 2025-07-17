@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MessagePreview } from '../../../shared/model/message-preview';
+import { ChatService } from '../chat.service';
 import { ListOfMessagesService } from './list-of-messages.service';
 import { MessagePreviewComponent } from './message-preview/message-preview.component';
 
@@ -16,7 +17,10 @@ export class ListOfMessagesComponent implements OnDestroy {
 
   private previewsSub!: Subscription;
 
-  constructor(private listOfMessagesService: ListOfMessagesService) {
+  constructor(
+    private listOfMessagesService: ListOfMessagesService,
+    public chatService: ChatService
+  ) {
     // this.mock();
     this.load();
   }

@@ -37,8 +37,11 @@
     }"
   >
     <div *ngIf="messages; else noMessages" class="flex flex-col gap-2">
-      <div *ngFor="let message of messages" class="w-full">
-        <app-message [message]="message" [chatType]="chat.type"></app-message>
+      <div *ngFor="let message of messages | messagesSortByDate" class="w-full">
+        <app-message
+          [message]="message.message"
+          [chatType]="chat.type"
+        ></app-message>
       </div>
     </div>
 
@@ -60,6 +63,7 @@
           type="text"
           placeholder="Type your message..."
           class="w-full h-11 px-4 pr-12 rounded-2xl bg-purple-100 dark:bg-zinc-800 text-sm text-gray-800 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition"
+          [(ngModel)]="textContent"
         />
         <button
           class="absolute right-2 top-1.5 w-8 h-8 bg-gray-300 dark:bg-zinc-600 hover:bg-gray-400 dark:hover:bg-zinc-600/90 text-gray-700 dark:text-white rounded-full flex justify-center items-center transition"
@@ -71,12 +75,15 @@
       <button
         class="w-11 h-11 text-xl bg-primary hover:bg-primary/90 text-white rounded-full flex justify-center items-center transition"
         [title]="'Quick Reaction: ' + chat.quickReaction"
+        (click)="sendQuickReaction()"
       >
         {{ chat.quickReaction }}
       </button>
       <button
-        class="w-11 h-11 text-xl bg-primary hover:bg-green-500/90 text-white rounded-full flex justify-center items-center transition"
+        class="w-11 h-11 text-xl bg-primary hover:bg-green-500/90 text-white rounded-full flex justify-center items-center transition disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400"
         title="Send"
+        [disabled]="!textContent"
+        (click)="sendTextMessage()"
       >
         <i class="fa-solid fa-paper-plane"></i>
       </button>

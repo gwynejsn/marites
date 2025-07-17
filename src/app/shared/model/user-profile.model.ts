@@ -14,6 +14,9 @@ export class UserProfile {
     public friendSuggestionsBlacklist: string[]
   ) {}
 
+  get fullName() {
+    return this.firstName + ' ' + this.lastName;
+  }
   static fromJSON(json: any): UserProfile {
     let lastSeen: Timestamp;
 

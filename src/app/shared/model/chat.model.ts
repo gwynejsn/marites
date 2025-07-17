@@ -25,4 +25,19 @@ export class Chat {
       members: this.members,
     };
   }
+
+  static fromJSON(json: any): Chat {
+    return new Chat(
+      json.type as chatType,
+      json.createdAt instanceof Timestamp
+        ? json.createdAt
+        : Timestamp.fromMillis(json.createdAt?.seconds * 1000 || 0),
+      json.chatName || '',
+      json.chatPhoto || '',
+      json.quickReaction || '',
+      json.backgroundColor ?? null,
+      json.status as status,
+      json.members as chatMemberMap
+    );
+  }
 }

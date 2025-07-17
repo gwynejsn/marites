@@ -2,11 +2,20 @@ import { Injectable } from '@angular/core';
 import {
   addDoc,
   collection,
+  doc,
   Firestore,
+  onSnapshot,
   Timestamp,
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
-import { firstValueFrom } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  firstValueFrom,
+  Observable,
+  switchMap,
+  throwError,
+} from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { storeStructure } from '../../app.config';
 import { selectCurrUserUID } from '../../authentication/store/authentication.selectors';
@@ -20,13 +29,14 @@ import { ListOfMessagesService } from './list-of-messages/list-of-messages.servi
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private userProfile: UserProfile | null = null;
+  private selectedChatUID$ = new BehaviorSubject<string | null>(null);
 
   constructor(
     private firestore: Firestore,
     private store$: Store<storeStructure>,
     private listOfMessagesService: ListOfMessagesService
   ) {
-    store$.pipe(select(selectUserProfile)).subscribe((up) => {
+    this.store$.pipe(select(selectUserProfile)).subscribe((up) => {
       this.userProfile = up.userProfile;
     });
   }
@@ -60,10 +70,9 @@ export class ChatService {
     );
 
     const chatRef = await addDoc(collection(this.firestore, 'chats'), {
-      ...chatCreated,
+      ...chatCreated.toJSON(),
     });
 
-    // create a preview of this chat
     await this.listOfMessagesService.createPrivateMessagePreview(
       new MessagePreview(
         chatRef.id,
@@ -74,7 +83,7 @@ export class ChatService {
           profilePicture,
           name,
           name,
-          Timestamp.now(), // or Timestamp.fromMillis(0) if you prefer
+          Timestamp.now(),
           '',
           '',
           true
@@ -85,6 +94,51 @@ export class ChatService {
       ),
       userUID,
       withUID
+    );
+  }
+
+  selectChat(chatUID: string) {
+    this.selectedChatUID$.next(chatUID);
+  }
+
+  getChat(): Observable<{ id: string; chat: Chat }> {
+    return this.selectedChatUID$.pipe(
+      switchMap((chatUID) => {
+        if (!chatUID) {
+          return EMPTY;
+        }
+
+        return this.store$.pipe(
+          select(selectCurrUserUID),
+          switchMap((userUID) => {
+            if (!userUID) {
+              return throwError(() => new Error('User not authenticated'));
+            }
+
+            return new Observable<{ id: string; chat: Chat }>((subscriber) => {
+              console.log('fetching chat,' + chatUID);
+
+              const docRef = doc(this.firestore, `chats/${chatUID}`);
+
+              const unsubscribe = onSnapshot(
+                docRef,
+                (snapshot) => {
+                  const data = snapshot.data();
+                  if (data) {
+                    subscriber.next({
+                      id: snapshot.id,
+                      chat: Chat.fromJSON(data),
+                    });
+                  }
+                },
+                (error) => subscriber.error(error)
+              );
+
+              return unsubscribe;
+            });
+          })
+        );
+      })
     );
   }
 }
