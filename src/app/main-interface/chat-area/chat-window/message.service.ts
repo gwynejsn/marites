@@ -8,6 +8,7 @@ import {
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
 import { firstValueFrom, Observable, switchMap, throwError } from 'rxjs';
+import { cloudinary } from '../../../../environments/cloudinary';
 import { storeStructure } from '../../../app.config';
 import { selectCurrUserUID } from '../../../authentication/store/authentication.selectors';
 import { Chat } from '../../../shared/model/chat.model';
@@ -60,15 +61,75 @@ export class MessageService {
     );
   }
 
+  async sendPhotos(
+    photos: File[],
+    chat: Chat,
+    chatUID: string
+  ): Promise<Message[]> {
+    console.log('sending photos');
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+
+    if (!userUID || !this.userProfile)
+      throw new Error('User not authenticated');
+
+    const sentMessages: Message[] = [];
+
+    for (const photo of photos) {
+      try {
+        const data = new FormData();
+        data.append('file', photo);
+        data.append('upload_preset', cloudinary.presetName);
+
+        const endpoint = `https://api.cloudinary.com/v1_1/${cloudinary.cloudName}/upload`;
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          body: data,
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Cloudinary upload failed: ${res.status} ${errText}`);
+        }
+
+        const photoLink = (await res.json()).url;
+
+        const message = new Message(
+          'Image',
+          userUID,
+          this.userProfile.profilePicture,
+          chat.members[userUID].name,
+          chat.members[userUID].nickname,
+          Timestamp.now(),
+          '',
+          photoLink,
+          false
+        );
+
+        await addDoc(collection(this.firestore, `chats/${chatUID}/messages`), {
+          ...message,
+        });
+
+        sentMessages.push(message);
+      } catch (err) {
+        console.error('Failed to upload photo to cloudinary!');
+        console.error(err);
+      }
+    }
+
+    return sentMessages;
+  }
+
   async sendTextMessage(
     content: string,
     chat: Chat,
     chatUID: string
-  ): Promise<void> {
+  ): Promise<Message> {
     const userUID = await firstValueFrom(
       this.store$.pipe(select(selectCurrUserUID))
     );
-    console.log('sending message');
 
     if (!userUID || !this.userProfile)
       throw new Error('User not authenticated');
@@ -88,5 +149,7 @@ export class MessageService {
     await addDoc(collection(this.firestore, `chats/${chatUID}/messages`), {
       ...message,
     });
+
+    return message;
   }
 }

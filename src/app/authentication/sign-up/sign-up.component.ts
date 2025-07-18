@@ -1,14 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { CloudinaryModule } from '@cloudinary/ng';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { storeStructure } from '../../app.config';
-import { UserProfileService } from '../../main-interface/user-profile/user-profile.service';
 import { gender } from '../../shared/types';
 import { AuthenticationService } from '../authentication.service';
 import {
@@ -42,9 +40,6 @@ export class SignUpComponent {
   };
 
   constructor(
-    private auth: Auth,
-    private router: Router,
-    private userProfileService: UserProfileService,
     private store$: Store<storeStructure>,
     private authenticationService: AuthenticationService
   ) {

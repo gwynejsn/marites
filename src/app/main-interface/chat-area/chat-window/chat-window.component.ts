@@ -8,17 +8,16 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { select, Store } from '@ngrx/store';
-import { Timestamp } from 'firebase/firestore';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { storeStructure } from '../../../app.config';
 import { selectCurrUserUID } from '../../../authentication/store/authentication.selectors';
 import { Chat } from '../../../shared/model/chat.model';
 import { Message } from '../../../shared/model/message';
 import { MessagesSortByDatePipe } from '../../../shared/pipes/messages-sort-by-date.pipe';
-import { messageType } from '../../../shared/types';
 import { selectUserProfile } from '../../user-profile/store/user-profile.selectors';
 import { ChatService } from '../chat.service';
 import { MessagesPreviewService } from '../list-of-messages/message-preview/messages-preview.service';
+import { ImagePreviewComponent } from './image-preview/image-preview.component';
 import { MessageService } from './message.service';
 import { MessageComponent } from './message/message.component';
 @Component({
@@ -28,6 +27,7 @@ import { MessageComponent } from './message/message.component';
     MessageComponent,
     FormsModule,
     MessagesSortByDatePipe,
+    ImagePreviewComponent,
   ],
   templateUrl: './chat-window.component.html',
 })
@@ -36,6 +36,13 @@ export class ChatWindowComponent implements OnDestroy {
   chatUID!: string;
   messages: { id: string; message: Message }[] | null = null;
   textContent: string | null = null;
+  photosSelected: File[] = [];
+  photosSelectedPreview: {
+    name: string;
+    url: string;
+  }[] = [];
+
+  messageViewed: { id: string; message: Message } | null = null;
 
   chatSub!: Subscription;
   messagesSub!: Subscription;
@@ -71,31 +78,54 @@ export class ChatWindowComponent implements OnDestroy {
     });
   }
 
-  sendQuickReaction() {
+  @ViewChild('scrollDiv') private scrollDiv!: ElementRef;
+  scrollToBottom() {
+    setTimeout(() => {
+      this.scrollDiv.nativeElement.scrollTop =
+        this.scrollDiv.nativeElement.scrollHeight;
+    });
+  }
+
+  async sendQuickReaction() {
     if (this.chat?.quickReaction) {
-      this.messageService.sendTextMessage(
+      const message = await this.messageService.sendTextMessage(
         this.chat.quickReaction,
         this.chat,
         this.chatUID
       );
-      this.updateMessagePreview('Text', this.chat.quickReaction);
+      await this.updateMessagePreview(message);
     }
   }
 
-  sendTextMessage() {
-    if (this.chat && this.textContent) {
-      this.messageService.sendTextMessage(
+  async sendMessage() {
+    let messageSent: Message | null = null;
+    // send photos
+
+    if (this.chat && this.photosSelected) {
+      const messagesSent = await this.messageService.sendPhotos(
+        this.photosSelected,
+        this.chat,
+        this.chatUID
+      );
+      if (messageSent) messageSent = messageSent[messagesSent.length - 1];
+    }
+
+    // send text
+    if (this.chat && this.textContent)
+      messageSent = await this.messageService.sendTextMessage(
         this.textContent,
         this.chat,
         this.chatUID
       );
-      this.updateMessagePreview('Text', this.textContent);
-    }
+
+    if (messageSent) await this.updateMessagePreview(messageSent);
 
     this.textContent = null;
+    this.photosSelected = [];
+    this.photosSelectedPreview = [];
   }
 
-  async updateMessagePreview(type: messageType, text = '', mediaUrl = '') {
+  async updateMessagePreview(message: Message) {
     const userUID = await firstValueFrom(
       this.store$.pipe(select(selectCurrUserUID))
     );
@@ -105,33 +135,54 @@ export class ChatWindowComponent implements OnDestroy {
 
     if (!userUID || !this.chat || !userProfile) throw 'User not authenticated!';
 
-    const updatedMessage = new Message(
-      type,
-      userUID,
-      userProfile.profilePicture,
-      this.chat.members[userUID].name,
-      this.chat.members[userUID].nickname,
-      Timestamp.now(),
-      text,
-      mediaUrl,
-      false
-    ).toFirestore();
-
     this.messagesPreviewService.updateMessagePreview(
       {
         chatUID: this.chatUID,
-        lastMessage: updatedMessage,
+        lastMessage: message.toFirestore(),
       },
       this.chatUID,
       Object.keys(this.chat.members)
     );
   }
 
-  @ViewChild('scrollDiv') private scrollDiv!: ElementRef;
-  scrollToBottom() {
-    setTimeout(() => {
-      this.scrollDiv.nativeElement.scrollTop =
-        this.scrollDiv.nativeElement.scrollHeight;
-    });
+  addPhoto(event: Event) {
+    const photo = (event.target as HTMLInputElement).files?.[0];
+    if (photo) {
+      this.photosSelected.push(photo);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          this.photosSelectedPreview.push({
+            name: photo.name,
+            url: reader.result,
+          });
+          this.cdr.detectChanges();
+        }
+      };
+      reader.readAsDataURL(photo);
+    }
+  }
+
+  removePhoto(name: string) {
+    console.log('removing ', name);
+
+    this.photosSelected = this.photosSelected.filter((p) => p.name !== name);
+    this.photosSelectedPreview = this.photosSelectedPreview.filter(
+      (p) => p.name !== name
+    );
+  }
+
+  viewMessage(message: { id: string; message: Message }) {
+    console.log('viewing');
+
+    if (message.message.type === 'Image') {
+      this.messageViewed = message;
+      this.cdr.detectChanges();
+    }
+  }
+
+  closeMessage() {
+    this.messageViewed = null;
+    this.cdr.detectChanges();
   }
 }

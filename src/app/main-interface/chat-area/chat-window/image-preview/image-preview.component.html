@@ -1,0 +1,62 @@
+<!-- Dim background -->
+<div
+  class="absolute top-0 left-0 w-full h-full backdrop-blur-sm bg-black/30 z-40"
+  (click)="closeMessageViewed.emit()"
+></div>
+
+<!-- Modal Content -->
+<div
+  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-2xl w-fit text-center z-50 flex flex-col gap-4 items-center justify-center"
+  (click)="$event.stopPropagation()"
+>
+  <!-- Controls -->
+  <div class="flex gap-4">
+    <button
+      class="w-11 h-11 bg-primary text-white rounded-full flex justify-center items-center"
+      (click)="zoomOut()"
+    >
+      -
+    </button>
+    <button
+      class="h-11 p-4 rounded-2xl bg-primary text-white flex justify-center items-center"
+      (click)="resetZoom()"
+    >
+      reset
+    </button>
+    <button
+      class="w-11 h-11 bg-primary text-white rounded-full flex justify-center items-center"
+      (click)="zoomIn()"
+    >
+      +
+    </button>
+  </div>
+
+  <!-- Image -->
+  <!-- Image Container -->
+  <div
+    class="w-[500px] h-[400px] overflow-hidden flex items-center justify-center"
+  >
+    <img
+      [src]="messageViewed.message.mediaUrl"
+      [style.transform]="'scale(' + scale + ')'"
+      class="transition-transform duration-300 max-w-full max-h-full object-contain"
+    />
+  </div>
+
+  <!-- Footer Buttons -->
+
+  <div class="flex gap-4">
+    <button
+      class="py-2 px-4 bg-primary text-white rounded-2xl"
+      (click)="download()"
+    >
+      Save
+    </button>
+    <button
+      class="py-2 px-4 bg-red-500 text-white rounded-2xl"
+      (click)="closeMessageViewed.emit()"
+    >
+      Close
+    </button>
+  </div>
+</div>
