@@ -100,8 +100,7 @@ export class FriendRequestsService {
       );
 
       // create a chat to this person
-      console.log('calling chat service create chat');
-
+      console.log('creating private chat');
       await this.chatService.createPrivateChat(UID, name, profilePicture);
     }
   }

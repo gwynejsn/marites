@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
 import {
-  addDoc,
   collection,
+  doc,
   Firestore,
   onSnapshot,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
+import { setDoc } from 'firebase/firestore';
 import { Observable, switchMap, throwError } from 'rxjs';
-import { storeStructure } from '../../../app.config';
-import { selectCurrUserUID } from '../../../authentication/store/authentication.selectors';
-import { MessagePreview } from '../../../shared/model/message-preview';
+import { storeStructure } from '../../../../app.config';
+import { selectCurrUserUID } from '../../../../authentication/store/authentication.selectors';
+import { MessagePreview } from '../../../../shared/model/message-preview';
 
 @Injectable({ providedIn: 'root' })
-export class ListOfMessagesService {
+export class MessagesPreviewService {
   constructor(
     private firestore: Firestore,
     private store$: Store<storeStructure>
@@ -57,23 +59,27 @@ export class ListOfMessagesService {
     );
   }
 
-  async createPrivateMessagePreview(
+  async createMessagePreview(
     messagePreview: MessagePreview,
-    currUserUID: string,
-    otherUserUID: string
+    chatUID: string,
+    membersUID: string[]
   ): Promise<void> {
-    // add to my previews
-    await addDoc(
-      collection(this.firestore, `users/${currUserUID}/messagesPreview`),
-      messagePreview.toFirestore()
-    );
+    for (const memberUID of membersUID)
+      await setDoc(
+        doc(this.firestore, `users/${memberUID}/messagesPreview/${chatUID}`),
+        messagePreview.toFirestore()
+      );
+  }
 
-    // add to his previews
-    await addDoc(
-      collection(this.firestore, `users/${otherUserUID}/messagesPreview`),
-      messagePreview.toFirestore()
-    );
-
-    console.log('previews added');
+  async updateMessagePreview(
+    update: any, // object of MessagePreview
+    chatUID: string,
+    membersUID: string[]
+  ): Promise<void> {
+    for (const memberUID of membersUID)
+      await updateDoc(
+        doc(this.firestore, `users/${memberUID}/messagesPreview/${chatUID}`),
+        update
+      );
   }
 }

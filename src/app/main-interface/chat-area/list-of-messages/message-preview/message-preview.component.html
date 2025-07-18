@@ -3,11 +3,14 @@
 >
   <div class="relative">
     <!-- Avatar -->
-    <img
-      [src]="messagePreview.chatPhoto"
-      [alt]="messagePreview.chatName"
-      class="w-[60px] h-[60px] rounded-full object-cover"
-    />
+    <div class="w-[60px] h-[60px] rounded-full bg-white">
+      <img
+        [src]="messagePreview.chatPhoto"
+        [alt]="messagePreview.chatName"
+        class="w-[60px] h-[60px] rounded-full object-cover"
+      />
+    </div>
+
     <div
       class="w-[12px] h-[12px] rounded-full bg-green-500 absolute right-1 bottom-0"
       *ngIf="messagePreview.status === 'Online'"

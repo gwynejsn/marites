@@ -4,7 +4,7 @@
 >
   <!-- Header -->
   <div
-    class="flex items-center gap-4 px-6 py-4 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 shadow-sm"
+    class="h-[12vh] flex items-center gap-4 px-6 py-4 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 shadow-sm"
   >
     <img
       class="w-[50px] h-[50px] rounded-full object-cover"
@@ -31,7 +31,8 @@
 
   <!-- Chat Content -->
   <div
-    class="flex-1 overflow-y-auto px-8 py-4 space-y-4 custom-scrollbar"
+    #scrollDiv
+    class="h-[76vh] overflow-y-auto px-8 py-4 space-y-4"
     [ngStyle]="{
       'background-color': chat.backgroundColor || 'bg-primary-dark'
     }"
@@ -55,7 +56,7 @@
 
   <!-- Chat Input -->
   <div
-    class="px-6 py-4 bg-gray-50 dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800"
+    class="h-[12vh] px-6 py-4 bg-gray-50 dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800"
   >
     <div class="flex items-end gap-3 w-full max-w-4xl mx-auto">
       <div class="relative flex-1">
