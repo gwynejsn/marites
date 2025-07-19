@@ -17,6 +17,7 @@ import { MessagesSortByDatePipe } from '../../../shared/pipes/messages-sort-by-d
 import { selectUserProfile } from '../../user-profile/store/user-profile.selectors';
 import { ChatService } from '../chat.service';
 import { MessagesPreviewService } from '../list-of-messages/message-preview/messages-preview.service';
+import { ChatInfoComponent } from './chat-info/chat-info.component';
 import { ImagePreviewComponent } from './image-preview/image-preview.component';
 import { MessageService } from './message.service';
 import { MessageComponent } from './message/message.component';
@@ -28,6 +29,7 @@ import { MessageComponent } from './message/message.component';
     FormsModule,
     MessagesSortByDatePipe,
     ImagePreviewComponent,
+    ChatInfoComponent,
   ],
   templateUrl: './chat-window.component.html',
 })
@@ -48,6 +50,8 @@ export class ChatWindowComponent implements OnDestroy {
   chatSub!: Subscription;
   messagesSub!: Subscription;
 
+  showChatInfo = false;
+
   constructor(
     private chatService: ChatService,
     private messageService: MessageService,
@@ -56,15 +60,6 @@ export class ChatWindowComponent implements OnDestroy {
     private store$: Store<storeStructure>
   ) {
     this.load();
-
-    if (this.chat) {
-      if (this.chat.chatName.type === 'group') {
-        console.log('Group name:', this.chat.chatName.name);
-      } else if (this.chat.chatName.type === 'private') {
-        const myUID = 'userA';
-        console.log('My view of name:', this.chat.chatName.names[myUID]);
-      }
-    }
   }
 
   ngOnDestroy(): void {
@@ -205,6 +200,17 @@ export class ChatWindowComponent implements OnDestroy {
 
   closeMessage() {
     this.messageViewed = null;
+    this.cdr.detectChanges();
+  }
+
+  viewChatInfo() {
+    this.showChatInfo = true;
+    this.cdr.detectChanges();
+  }
+
+  closeChatInfo() {
+    this.showChatInfo = false;
+    this.scrollToBottom();
     this.cdr.detectChanges();
   }
 }

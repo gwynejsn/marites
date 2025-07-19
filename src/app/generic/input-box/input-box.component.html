@@ -1,0 +1,39 @@
+<!-- Dim background -->
+<div
+  class="absolute top-0 left-0 w-full h-full backdrop-blur-sm bg-black/30 z-40"
+  (click)="cancel.emit()"
+></div>
+
+<!-- Dialog box -->
+<div
+  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-2xl w-[90%] max-w-sm z-50"
+  (click)="$event.stopPropagation()"
+>
+  <h2
+    class="text-lg font-semibold text-gray-800 dark:text-white mb-4 text-center"
+  >
+    {{ data.title || "Edit" }}
+  </h2>
+
+  <input
+    type="text"
+    [(ngModel)]="value"
+    [placeholder]="data.placeholder || ''"
+    class="w-full p-3 rounded-xl border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-black dark:text-white mb-6 focus:outline-none focus:ring-2 focus:ring-primary"
+  />
+
+  <div class="flex justify-center gap-4">
+    <button
+      class="px-4 py-2 rounded-xl bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium transition-colors"
+      (click)="cancel.emit()"
+    >
+      {{ data.cancelText || "Cancel" }}
+    </button>
+    <button
+      class="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium transition-colors"
+      (click)="submit()"
+    >
+      {{ data.confirmText || "Save" }}
+    </button>
+  </div>
+</div>

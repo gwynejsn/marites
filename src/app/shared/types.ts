@@ -21,7 +21,6 @@ export type chatMemberMap = {
   [uid: string]: {
     name: string;
     nickname: string;
-    status: status;
   };
 };
 export type signUpForm = {

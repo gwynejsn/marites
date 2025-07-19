@@ -1,0 +1,111 @@
+<section
+  class="w-full h-full px-8 py-6 flex flex-col gap-8 dark:bg-zinc-900 bg-zinc-50 relative"
+>
+  <div
+    class="absolute top-0 left-0 w-full h-full z-40"
+    *ngIf="selectQuickReaction"
+    (click)="closeChooseQuickReaction()"
+  ></div>
+
+  <!-- Back Button -->
+  <div>
+    <button
+      class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors"
+      (click)="closeChatInfo.emit()"
+    >
+      <i class="fa-solid fa-circle-chevron-left fa-2xl"></i>
+    </button>
+  </div>
+
+  <!-- Chat Info -->
+  <div class="flex flex-col items-center gap-6">
+    <!-- Avatar and Name -->
+    <div class="flex flex-col items-center gap-3">
+      <img
+        class="w-[150px] h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-zinc-800"
+        [src]="chat.chatPhoto"
+        [alt]="chatName || 'Chat avatar'"
+      />
+      <h3
+        class="text-xl font-semibold text-zinc-800 dark:text-white text-center"
+      >
+        {{ chatName }}
+      </h3>
+    </div>
+
+    <!-- Customization Card -->
+    <div
+      class="w-full bg-zinc-100 dark:bg-zinc-800 rounded-2xl shadow p-5 space-y-4"
+    >
+      <h4 class="text-zinc-700 dark:text-zinc-200 font-semibold text-base">
+        Customization
+      </h4>
+
+      <!-- Chat Color Picker -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <input
+            type="color"
+            [(ngModel)]="chatColor"
+            class="w-[30px] h-[30px] rounded-full p-0 cursor-pointer border-none"
+          />
+          <span class="text-sm text-zinc-700 dark:text-zinc-300">
+            Chat color
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Reaction Picker -->
+      <div class="flex items-center justify-between relative">
+        <div class="flex items-center gap-4">
+          <button
+            class="w-[30px] h-[30px] text-xl bg-primary hover:bg-primary/90 text-white rounded-full flex justify-center items-center transition"
+            [title]="'Quick Reaction: ' + quickReaction"
+            (click)="chooseQuickReaction()"
+          >
+            {{ quickReaction }}
+          </button>
+          <span class="text-sm text-zinc-700 dark:text-zinc-300">
+            Quick reaction
+          </span>
+        </div>
+
+        <!-- Emoji Picker Dropdown -->
+        <div
+          *ngIf="selectQuickReaction"
+          class="absolute left-0 top-full mt-2 grid grid-cols-5 gap-2 bg-zinc-700 p-3 rounded-2xl z-50 w-[180px] shadow-lg"
+        >
+          <div
+            *ngFor="let r of reactions"
+            class="w-[30px] h-[30px] p-1 text-xl hover:bg-primary hover:text-white rounded-full flex items-center justify-center cursor-pointer transition"
+            (click)="setQuickReaction(r.emoji)"
+          >
+            {{ r.emoji }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nicknames Card -->
+    <div class="w-full bg-zinc-100 dark:bg-zinc-800 rounded-2xl shadow p-5">
+      <h4 class="text-zinc-700 dark:text-zinc-200 font-semibold text-base mb-4">
+        Nicknames
+      </h4>
+      <div
+        *ngFor="let member of members"
+        class="text-sm text-zinc-800 dark:text-zinc-300 px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full"
+        (click)="changeMemberNickname = member.nickname"
+      >
+        {{ member.nickname }}
+      </div>
+    </div>
+  </div>
+  <app-input-box
+    *ngIf="changeMemberNickname.length > 0"
+    [data]="{
+      title: 'Change nickname',
+      placeholder: changeMemberNickname
+    }"
+    (cancel)="changeMemberNickname = ''"
+  ></app-input-box>
+</section>

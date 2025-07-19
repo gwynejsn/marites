@@ -66,11 +66,10 @@ export class ChatService {
       environment.defaultQuickReaction,
       null,
       {
-        [withUID]: { name: withName, nickname: withName, status: 'Online' },
+        [withUID]: { name: withName, nickname: withName },
         [userUID]: {
           name: this.userProfile.fullName,
           nickname: this.userProfile.fullName,
-          status: 'Online',
         },
       }
     );
