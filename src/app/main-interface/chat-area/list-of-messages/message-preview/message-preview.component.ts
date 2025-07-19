@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
+import { select, Store } from '@ngrx/store';
+import { storeStructure } from '../../../../app.config';
+import { selectCurrUserUID } from '../../../../authentication/store/authentication.selectors';
 import { MessagePreview } from '../../../../shared/model/message-preview';
 
 @Component({
@@ -10,12 +12,11 @@ import { MessagePreview } from '../../../../shared/model/message-preview';
 })
 export class MessagePreviewComponent {
   @Input() messagePreview!: MessagePreview;
-  read!: boolean;
+  currUserUID!: string | null;
 
-  constructor(private auth: Auth) {
-    const currUserUID = this.auth.currentUser?.uid;
-    if (currUserUID && this.messagePreview) {
-      this.read = this.messagePreview.readBy.includes(currUserUID);
-    }
+  constructor(private store$: Store<storeStructure>) {
+    store$
+      .pipe(select(selectCurrUserUID))
+      .subscribe((u) => (this.currUserUID = u));
   }
 }

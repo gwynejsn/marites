@@ -15,17 +15,8 @@
       <h3
         class="text-lg font-semibold text-gray-900 dark:text-white truncate max-w-[200px]"
       >
-        {{ chat.chatName || "Private Chat" }}
+        {{ chatName }}
       </h3>
-      <p
-        [ngClass]="{
-          'text-green-500 dark:text-green-400': chat.status === 'Online',
-          'text-gray-500 dark:text-gray-400': chat.status !== 'Online'
-        }"
-        class="text-sm"
-      >
-        {{ chat.status }}
-      </p>
     </div>
   </div>
 
@@ -66,7 +57,7 @@
 
   <!-- Chat Input -->
   <div
-    class="px-6 py-4 bg-gray-50 dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 flex flex-col gap-2"
+    class="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 flex flex-col gap-2"
     [ngClass]="{
       'h-[12vh]': photosSelectedPreview.length === 0,
       'h-[22vh]': photosSelectedPreview.length !== 0
@@ -80,7 +71,7 @@
         />
 
         <button
-          class="absolute z-50 top-1 right-1"
+          class="absolute z-50 top-1 right-1 hover:text-red-300"
           (click)="removePhoto(p.name)"
         >
           x

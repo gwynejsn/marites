@@ -1,15 +1,14 @@
 import { Timestamp } from 'firebase/firestore';
-import { chatMemberMap, chatType, status } from '../types';
+import { chatMemberMap, chatNameMap, chatType } from '../types';
 
 export class Chat {
   constructor(
     public type: chatType,
     public createdAt: Timestamp,
-    public chatName: string,
+    public chatName: chatNameMap,
     public chatPhoto: string,
     public quickReaction: string,
     public backgroundColor: string | null,
-    public status: status,
     public members: chatMemberMap
   ) {}
 
@@ -21,7 +20,6 @@ export class Chat {
       chatPhoto: this.chatPhoto,
       quickReaction: this.quickReaction,
       backgroundColor: this.backgroundColor,
-      status: this.status,
       members: this.members,
     };
   }
@@ -36,7 +34,6 @@ export class Chat {
       json.chatPhoto || '',
       json.quickReaction || '',
       json.backgroundColor ?? null,
-      json.status as status,
       json.members as chatMemberMap
     );
   }

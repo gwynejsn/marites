@@ -8,7 +8,7 @@ import {
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
 import { setDoc } from 'firebase/firestore';
-import { Observable, switchMap, throwError } from 'rxjs';
+import { firstValueFrom, Observable, switchMap, throwError } from 'rxjs';
 import { storeStructure } from '../../../../app.config';
 import { selectCurrUserUID } from '../../../../authentication/store/authentication.selectors';
 import { MessagePreview } from '../../../../shared/model/message-preview';
@@ -81,5 +81,17 @@ export class MessagesPreviewService {
         doc(this.firestore, `users/${memberUID}/messagesPreview/${chatUID}`),
         update
       );
+  }
+
+  async setMessagePreviewToRead(chatUID: string) {
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+    await updateDoc(
+      doc(this.firestore, `users/${userUID}/messagesPreview/${chatUID}`),
+      {
+        read: true,
+      }
+    );
   }
 }

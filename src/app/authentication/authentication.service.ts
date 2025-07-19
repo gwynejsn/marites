@@ -8,7 +8,6 @@ import {
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { signOut, User } from 'firebase/auth';
-import { Timestamp } from 'firebase/firestore';
 import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 import { removeUserProfile } from '../main-interface/user-profile/store/user-profile.actions';
@@ -62,8 +61,6 @@ export class AuthenticationService {
         form.gender as gender,
         form.email,
         imgUrl!,
-        'Online',
-        Timestamp.now(),
         []
       );
 

@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Auth, authState, User } from '@angular/fire/auth';
 import { doc, Firestore, setDoc } from '@angular/fire/firestore';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { getDoc } from 'firebase/firestore';
 import { firstValueFrom, Observable } from 'rxjs';
 import { cloudinary } from '../../../environments/cloudinary';
+import { storeStructure } from '../../app.config';
+import { selectCurrUserUID } from '../../authentication/store/authentication.selectors';
 import { UserProfile } from '../../shared/model/user-profile.model';
 import { setUserProfile } from './store/user-profile.actions';
 
@@ -15,17 +17,20 @@ export class UserProfileService {
   constructor(
     private firestore: Firestore,
     private auth: Auth,
-    private store$: Store
+    private store$: Store<storeStructure>
   ) {
     this.authState$ = authState(this.auth);
   }
 
   // Save user profile using UID as document ID
   async addUserProfile(userProfile: UserProfile): Promise<void> {
-    const user = await firstValueFrom(this.authState$);
-    if (!user) throw new Error('User not authenticated');
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
 
-    const userDocRef = doc(this.firestore, 'users', user.uid);
+    if (!userUID) throw new Error('User not authenticated');
+
+    const userDocRef = doc(this.firestore, 'users', userUID);
     // upload user profile
     await setDoc(userDocRef, { ...userProfile });
     // set locally
@@ -33,11 +38,13 @@ export class UserProfileService {
   }
 
   async getUserProfile(): Promise<UserProfile> {
-    // TODO: error handling
-    const user = await firstValueFrom(this.authState$);
-    if (!user) throw new Error('User not authenticated');
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
 
-    const docRef = doc(this.firestore, 'users', user.uid);
+    if (!userUID) throw new Error('User not authenticated');
+
+    const docRef = doc(this.firestore, 'users', userUID);
     return (await getDoc(docRef)).data() as UserProfile;
   }
 
@@ -58,23 +65,6 @@ export class UserProfileService {
     }
   }
 
-  // async updateStatusAndLastSeen(to: Timestamp): Promise<void> {
-  //   const user = await firstValueFrom(this.authState$);
-  //   if (!user) throw new Error('User is not authenticated!');
-
-  //   const userProfile = await firstValueFrom(this.getUserProfile());
-  //   if (!userProfile) throw new Error('User profile does not exist!');
-
-  //   userProfile.lastSeen = to;
-  //   userProfile.status = 'Online';
-
-  //   const docRef = doc(this.firestore, 'users', user.uid);
-  //   await updateDoc(docRef, { ...userProfile });
-  // }
-
-  // TODO create a method for setting status online or offline
-
-  // Upload profile picture to Cloudinary
   async uploadProfilePicture(
     profilePicture: File | null
   ): Promise<string | null> {

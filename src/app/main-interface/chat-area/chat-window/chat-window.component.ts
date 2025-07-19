@@ -34,6 +34,7 @@ import { MessageComponent } from './message/message.component';
 export class ChatWindowComponent implements OnDestroy {
   chat: Chat | null = null;
   chatUID!: string;
+  chatName!: string;
   messages: { id: string; message: Message }[] | null = null;
   textContent: string | null = null;
   photosSelected: File[] = [];
@@ -55,6 +56,15 @@ export class ChatWindowComponent implements OnDestroy {
     private store$: Store<storeStructure>
   ) {
     this.load();
+
+    if (this.chat) {
+      if (this.chat.chatName.type === 'group') {
+        console.log('Group name:', this.chat.chatName.name);
+      } else if (this.chat.chatName.type === 'private') {
+        const myUID = 'userA';
+        console.log('My view of name:', this.chat.chatName.names[myUID]);
+      }
+    }
   }
 
   ngOnDestroy(): void {
@@ -62,10 +72,18 @@ export class ChatWindowComponent implements OnDestroy {
     this.messagesSub?.unsubscribe();
   }
 
-  load() {
+  async load() {
+    const currUserUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
     this.chatSub = this.chatService.getChat().subscribe((c) => {
       this.chat = c.chat;
       this.chatUID = c.id;
+      if (c.chat.chatName.type === 'private' && currUserUID)
+        this.chatName = c.chat.chatName.names[currUserUID] ?? 'Unknown';
+      else if (c.chat.chatName.type === 'group')
+        this.chatName = c.chat.chatName.name ?? 'Unknown';
+
       this.cdr.detectChanges();
 
       this.messagesSub = this.messageService
@@ -146,6 +164,8 @@ export class ChatWindowComponent implements OnDestroy {
   }
 
   addPhoto(event: Event) {
+    console.log('adding photo');
+
     const photo = (event.target as HTMLInputElement).files?.[0];
     if (photo) {
       this.photosSelected.push(photo);
@@ -160,6 +180,7 @@ export class ChatWindowComponent implements OnDestroy {
         }
       };
       reader.readAsDataURL(photo);
+      console.log(this.photosSelected);
     }
   }
 
@@ -170,6 +191,7 @@ export class ChatWindowComponent implements OnDestroy {
     this.photosSelectedPreview = this.photosSelectedPreview.filter(
       (p) => p.name !== name
     );
+    this.cdr.detectChanges();
   }
 
   viewMessage(message: { id: string; message: Message }) {

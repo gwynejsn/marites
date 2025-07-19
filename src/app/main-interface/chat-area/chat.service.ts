@@ -29,6 +29,7 @@ import { MessagesPreviewService } from './list-of-messages/message-preview/messa
 export class ChatService {
   private userProfile: UserProfile | null = null;
   private selectedChat$ = new BehaviorSubject<string | null>(null);
+  private selectedChatStatus$ = new BehaviorSubject<string | null>(null);
 
   constructor(
     private firestore: Firestore,
@@ -54,16 +55,22 @@ export class ChatService {
     const chatCreated = new Chat(
       'Private',
       Timestamp.now(),
-      withName,
+      {
+        type: 'private',
+        names: {
+          [withUID]: this.userProfile.fullName,
+          [userUID]: withName,
+        },
+      },
       withProfilePicture,
       environment.defaultQuickReaction,
       null,
-      'Online',
       {
-        [withUID]: { name: withName, nickname: withName },
+        [withUID]: { name: withName, nickname: withName, status: 'Online' },
         [userUID]: {
           name: this.userProfile.fullName,
           nickname: this.userProfile.fullName,
+          status: 'Online',
         },
       }
     );
@@ -71,21 +78,17 @@ export class ChatService {
     const chatRef = await addDoc(collection(this.firestore, 'chats'), {
       ...chatCreated.toJSON(),
     });
-    console.log('chat created');
-
-    // create preview for this chat
-    console.log('members uid: ');
-    console.log(Object.keys(chatCreated.members));
 
     await this.messagesPreviewService.createMessagePreview(
-      MessagePreview.init(chatCreated.chatName, chatCreated.chatPhoto),
+      MessagePreview.init(withName, chatCreated.chatPhoto),
       chatRef.id,
       Object.keys(chatCreated.members)
     );
   }
 
-  selectChat(chatUID: string) {
+  async selectChat(chatUID: string) {
     this.selectedChat$.next(chatUID);
+    await this.messagesPreviewService.setMessagePreviewToRead(chatUID);
   }
 
   getChat(): Observable<{ id: string; chat: Chat }> {

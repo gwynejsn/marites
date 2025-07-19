@@ -10,11 +10,6 @@
         class="w-[60px] h-[60px] rounded-full object-cover"
       />
     </div>
-
-    <div
-      class="w-[12px] h-[12px] rounded-full bg-green-500 absolute right-1 bottom-0"
-      *ngIf="messagePreview.status === 'Online'"
-    ></div>
   </div>
 
   <!-- Message Content -->
@@ -23,8 +18,8 @@
     <div class="flex justify-between items-center w-full">
       <p
         [ngClass]="{
-          'font-bold text-gray-900 dark:text-white': read,
-          'font-medium text-gray-700 dark:text-gray-300': read
+          'font-bold text-gray-900 dark:text-white': !messagePreview.read,
+          'font-medium text-gray-700 dark:text-gray-300': messagePreview.read
         }"
       >
         {{ messagePreview.chatName }}
@@ -38,21 +33,21 @@
     <div
       class="flex text-sm overflow-hidden whitespace-nowrap"
       [ngClass]="{
-        'text-gray-800 dark:text-gray-200 font-semibold': read,
-        'text-gray-600 dark:text-gray-400': read
+        'text-gray-800 dark:text-gray-200 font-semibold': !messagePreview.read,
+        'text-gray-600 dark:text-gray-400': messagePreview.read
       }"
     >
       <ng-container
         *ngIf="messagePreview.lastMessage.type === 'Text'; else media"
       >
-        <span
-          *ngIf="
-            messagePreview.chatName !== messagePreview.lastMessage.senderName
-          "
-          class="pr-1"
-        >
-          {{ messagePreview.lastMessage.senderNickName }}:
+        <span *ngIf="!messagePreview.lastMessage.empty" class="pr-1">
+          {{
+            messagePreview.lastMessage.senderUID === currUserUID
+              ? "You"
+              : messagePreview.lastMessage.senderName
+          }}:
         </span>
+
         <div *ngIf="!messagePreview.lastMessage.empty; else emptyMessage">
           <span
             *ngIf="
@@ -80,6 +75,7 @@
         >
           {{ messagePreview.lastMessage.senderNickName }}:
         </span>
+
         <span>
           sent a
           {{ messagePreview.lastMessage.type === "Image" ? "photo" : "file" }}
