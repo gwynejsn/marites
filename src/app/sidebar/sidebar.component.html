@@ -144,7 +144,7 @@
 
     <!-- Mode -->
     <ul class="flex flex-col gap-2 items-start">
-      <li>
+      <li class="flex items-center">
         <button
           class="flex gap-4 p-2 items-start justify-center hover:scale-110 transition-transform"
           (click)="darkModeService.toggleDarkMode()"
@@ -252,6 +252,15 @@
             </g>
           </svg>
         </button>
+        <p
+          class="pl-3 text-sm"
+          [ngClass]="{
+            'hidden transition-discrete not-peer-has-checked:opacity-0 peer-has-checked:block':
+              !showSidebar()
+          }"
+        >
+          by {{ "@" }}<span class="text-yellow-200">GwyneJsn</span>
+        </p>
       </li>
     </ul>
   </div>

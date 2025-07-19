@@ -31,7 +31,7 @@ export class ChatInfoComponent implements OnInit {
   }[];
   changeMemberNickname: string = '';
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(public cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.members = Object.values(this.chat.members);

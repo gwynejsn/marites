@@ -93,8 +93,8 @@
       </h4>
       <div
         *ngFor="let member of members"
-        class="text-sm text-zinc-800 dark:text-zinc-300 px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full"
-        (click)="changeMemberNickname = member.nickname"
+        class="text-sm text-zinc-800 dark:text-zinc-300 px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:cursor-pointer rounded-full"
+        (click)="changeMemberNickname = member.nickname; cdr.detectChanges()"
       >
         {{ member.nickname }}
       </div>
