@@ -21,7 +21,7 @@ export type chatNameMap = chatNameGroup | chatNamePrivate;
 export type chatMemberMap = {
   [uid: string]: {
     name: string;
-    nickname: string;
+    profilePicture: string;
   };
 };
 export type signUpForm = {

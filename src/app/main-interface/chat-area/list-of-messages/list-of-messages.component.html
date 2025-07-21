@@ -1,5 +1,6 @@
 <section
   class="flex flex-col border-r border-gray-300 dark:border-zinc-700 h-full items-center py-6 px-6 w-full bg-white dark:bg-zinc-900"
+  *ngIf="!showCreateGroupChat"
 >
   <!-- Logo -->
   <div class="flex items-center w-full mb-6">
@@ -42,10 +43,14 @@
     <button
       *ngIf="messages && messages.length !== 0"
       class="dark:bg-zinc-800 bg-zinc-50 p-4 rounded-2xl my-4 dark:hover:bg-zinc-700 hover:bg-zinc-100"
+      (click)="showCreateGroupChat = true"
     >
       Create a group chat
     </button>
   </div>
-
-  <app-create-group-chat *ngIf="showCreateGroupChat"></app-create-group-chat>
 </section>
+
+<app-create-group-chat
+  *ngIf="showCreateGroupChat"
+  (cancel)="showCreateGroupChat = false"
+></app-create-group-chat>

@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  Output,
+} from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MessagePreview } from '../../../shared/model/message-preview';
 import { ChatService } from '../chat.service';
@@ -24,7 +30,8 @@ export class ListOfMessagesComponent implements OnDestroy {
 
   constructor(
     private messagesPreviewService: MessagesPreviewService,
-    public chatService: ChatService
+    public chatService: ChatService,
+    public cdr: ChangeDetectorRef
   ) {
     this.load();
   }

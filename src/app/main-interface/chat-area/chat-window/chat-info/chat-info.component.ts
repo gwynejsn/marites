@@ -29,7 +29,7 @@ export class ChatInfoComponent implements OnInit {
 
   members!: {
     name: string;
-    nickname: string;
+    profilePicture: string;
   }[];
 
   constructor(

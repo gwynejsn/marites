@@ -1,1 +1,145 @@
-<p>create-group-chat works!</p>
+<!-- step 1 -->
+<section
+  class="flex flex-col gap-2 border-r border-gray-300 dark:border-zinc-700 h-full py-6 px-6 w-full bg-white dark:bg-zinc-900"
+  *ngIf="step() === 1"
+>
+  <div class="w-full mb-6 flex flex-col gap-2 h-[35vh]">
+    <h2 class="text-2xl font-semibold">Create a Group chat</h2>
+    <div class="relative w-full mb-6">
+      <input
+        type="text"
+        placeholder="Search..."
+        class="w-full h-11 px-4 pr-12 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-sm text-gray-800 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition"
+      />
+      <button
+        class="absolute right-2 top-1.5 w-8 h-8 bg-primary hover:bg-primary/90 text-white rounded-full flex justify-center items-center transition"
+      >
+        <i class="fas fa-microphone text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Friends list -->
+    <div
+      *ngFor="let f of availableFriends()"
+      class="p-4 rounded-md w-full flex justify-between items-center border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
+    >
+      <div class="flex justify-between w-full items-center">
+        <div class="flex items-center gap-4">
+          <img
+            [src]="f.friend.profilePicture"
+            [alt]="'Profile picture of ' + f.friend.name"
+            class="w-[45px] h-[45px] rounded-full object-cover border border-gray-300 dark:border-zinc-500"
+          />
+          <p class="text-gray-800 dark:text-gray-100 font-medium">
+            {{ f.friend.name }}
+          </p>
+        </div>
+
+        <button
+          class="py-2 px-4 bg-primary rounded-2xl"
+          (click)="addMember(f.id, f.friend.name, f.friend.profilePicture)"
+        >
+          add
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- List of members -->
+  <div
+    class="flex flex-col gap-2 w-full border-t-1 border-zinc-500 pt-4 h-[35vh]"
+  >
+    <h3>Members</h3>
+    <div
+      *ngFor="let member of chatMembers() | keyvalue"
+      class="p-4 rounded-md w-full flex justify-between items-center border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
+    >
+      <div class="flex items-center gap-4">
+        <img
+          [src]="member.value.profilePicture"
+          [alt]="'Profile picture of ' + member.value.name"
+          class="w-[45px] h-[45px] rounded-full object-cover border border-gray-300 dark:border-zinc-500"
+        />
+        <p class="text-gray-800 dark:text-gray-100 font-medium">
+          {{ member.value.name }}
+        </p>
+      </div>
+
+      <button
+        class="py-2 px-4 bg-red-500 rounded-2xl"
+        *ngIf="member.key !== currUserUID"
+        (click)="removeMember(member.key)"
+      >
+        remove
+      </button>
+    </div>
+  </div>
+  <!-- navigation -->
+  <div class="h-[20vh] border-t-1 border-zinc-500 pt-4">
+    <div class="flex w-full gap-4">
+      <button class="px-4 py-2 bg-red-500 rounded-2xl" (click)="cancel.emit()">
+        Cancel
+      </button>
+      <button class="px-4 py-2 bg-primary rounded-2xl" (click)="step.set(2)">
+        Next
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- step 2 -->
+<section
+  class="flex flex-col gap-8 border-r border-gray-300 dark:border-zinc-700 h-full py-6 px-6 w-full bg-white dark:bg-zinc-900"
+  *ngIf="step() === 2"
+>
+  <div class="w-full flex flex-col items-center">
+    <!-- Avatar Preview -->
+    <img
+      [src]="chatPhotoPreview"
+      alt="Profile preview"
+      class="w-38 h-38 object-cover rounded-full border-2 border-primary shadow my-4"
+    />
+
+    <!-- Label Trigger -->
+    <label
+      for="chatPhoto"
+      class="w-fit px-8 cursor-pointer bg-primary text-white p-4 rounded-full hover:opacity-80 transition"
+    >
+      Choose a Group Chat Photo
+    </label>
+
+    <!-- Hidden File Input -->
+    <input
+      type="file"
+      accept="image/*"
+      id="chatPhoto"
+      name="profilePicture"
+      class="hidden"
+      (change)="changeProfileSelected($event)"
+      #profilePicture="ngModel"
+      [(ngModel)]="chatPhoto"
+    />
+  </div>
+
+  <div class="border-t-1 border-zinc-500 pt-4">
+    <input
+      type="text"
+      [(ngModel)]="chatName"
+      placeholder="Chat name..."
+      class="w-full h-11 px-4 pr-12 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-sm text-gray-800 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition"
+    />
+  </div>
+  <!-- navigation -->
+  <div class="flex w-full gap-4 mt-12">
+    <button class="px-4 py-2 bg-red-500 rounded-2xl" (click)="step.set(1)">
+      Back
+    </button>
+    <button
+      class="px-4 py-2 bg-primary rounded-2xl disabled:opacity-60"
+      (click)="createChat()"
+      [disabled]="!isValid()"
+    >
+      Create
+    </button>
+  </div>
+</section>

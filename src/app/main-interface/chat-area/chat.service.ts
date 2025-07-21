@@ -68,10 +68,10 @@ export class ChatService {
       environment.defaultQuickReaction,
       null,
       {
-        [withUID]: { name: withName, nickname: withName },
+        [withUID]: { name: withName, profilePicture: withProfilePicture },
         [userUID]: {
           name: this.userProfile.fullName,
-          nickname: this.userProfile.fullName,
+          profilePicture: this.userProfile.profilePicture,
         },
       }
     );

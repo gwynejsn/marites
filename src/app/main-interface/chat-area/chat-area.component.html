@@ -3,7 +3,7 @@
     *ngIf="showListOfMessages"
     [ngClass]="{
       hidden: isMobile && chatSelected,
-      'flex flex-1': isMobile && !chatSelected,
+      'flex-1': isMobile && !chatSelected,
       'md:block md:w-[30%]': true
     }"
     (chatSelected)="chatSelected = true"
