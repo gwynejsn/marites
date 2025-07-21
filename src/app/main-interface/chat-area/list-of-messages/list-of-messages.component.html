@@ -28,8 +28,8 @@
     <app-message-preview
       *ngFor="let message of messages"
       [messagePreview]="message.preview"
-      class="w-full"
-      (click)="chatService.selectChat(message.previewId)"
+      class="w-full flex-1"
+      (click)="chatService.selectChat(message.previewId); chatSelected.emit()"
     >
     </app-message-preview>
 
@@ -39,5 +39,13 @@
     >
       No messages!
     </p>
+    <button
+      *ngIf="messages && messages.length !== 0"
+      class="dark:bg-zinc-800 bg-zinc-50 p-4 rounded-2xl my-4 dark:hover:bg-zinc-700 hover:bg-zinc-100"
+    >
+      Create a group chat
+    </button>
   </div>
+
+  <app-create-group-chat *ngIf="showCreateGroupChat"></app-create-group-chat>
 </section>

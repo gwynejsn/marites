@@ -4,27 +4,38 @@
 >
   <!-- Header -->
   <div
-    class="h-[12vh] px-6 py-4 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 shadow-sm flex justify-between items-center gap-4"
-    (click)="viewChatInfo()"
+    class="h-[12vh] px-6 py-4 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 shadow-sm flex gap-8"
   >
-    <div class="flex items-center gap-4">
-      <img
-        class="w-[50px] h-[50px] rounded-full object-cover"
-        [src]="chat.chatPhoto"
-        [alt]="chatName || 'Chat avatar'"
-      />
-      <div class="flex flex-col">
-        <h3
-          class="text-lg text-gray-900 dark:text-white truncate max-w-[200px] hover:cursor-pointer"
-        >
-          {{ chatName }}
-        </h3>
+    <button
+      *ngIf="isMobile"
+      class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors"
+      (click)="back.emit()"
+    >
+      <i class="fa-solid fa-circle-chevron-left fa-2xl"></i>
+    </button>
+    <div
+      class="flex flex-1 justify-between items-center gap-4"
+      (click)="viewChatInfo()"
+    >
+      <div class="flex items-center gap-4">
+        <img
+          class="w-[50px] h-[50px] rounded-full object-cover"
+          [src]="chat.chatPhoto"
+          [alt]="chatName || 'Chat avatar'"
+        />
+        <div class="flex flex-col">
+          <h3
+            class="text-lg text-gray-900 dark:text-white truncate max-w-[200px] hover:cursor-pointer"
+          >
+            {{ chatName }}
+          </h3>
+        </div>
       </div>
-    </div>
-    <div class="pr-4">
-      <button class="hover:opacity-90" (click)="viewChatInfo()">
-        <i class="fa-solid fa-circle-info fa-lg"></i>
-      </button>
+      <div class="pr-4">
+        <button class="hover:opacity-90" (click)="viewChatInfo()">
+          <i class="fa-solid fa-circle-info fa-lg"></i>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -36,11 +47,9 @@
   ></app-image-preview>
   <div
     #scrollDiv
-    [ngClass]="{
-      'h-[76vh]': photosSelectedPreview.length === 0,
-      'h-[66vh]': photosSelectedPreview.length !== 0
-    }"
-    class="overflow-y-auto px-8 py-4 space-y-4"
+    [ngClass]="[photosSelectedPreview.length === 0 ? 'h-[76vh]' : 'h-[66vh]']"
+    [style.backgroundColor]="chat.backgroundColor"
+    class="overflow-y-auto px-8 py-4 space-y-4 transition"
   >
     <div *ngIf="messages; else noMessages" class="flex flex-col gap-2">
       <div *ngFor="let message of messages | messagesSortByDate" class="w-full">
@@ -142,6 +151,7 @@
   <!-- Chat info -->
   <app-chat-info
     [chat]="chat!"
+    [chatUID]="chatUID"
     [chatName]="chatName"
     (closeChatInfo)="closeChatInfo()"
   ></app-chat-info>

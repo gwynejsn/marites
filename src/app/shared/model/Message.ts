@@ -7,7 +7,6 @@ export class Message {
     public senderUID: string,
     public senderProfilePicture: string,
     public senderName: string,
-    public senderNickName: string,
     public timestamp: Timestamp,
     public text: string,
     public mediaUrl: string,
@@ -20,7 +19,6 @@ export class Message {
       json.senderUID,
       json.senderProfilePicture,
       json.senderName,
-      json.senderNickName,
       json.timestamp instanceof Timestamp
         ? json.timestamp
         : Timestamp.fromMillis(json.timestamp?.seconds * 1000 || 0),
@@ -36,7 +34,6 @@ export class Message {
       senderUID: this.senderUID,
       senderProfilePicture: this.senderProfilePicture,
       senderName: this.senderName,
-      senderNickName: this.senderNickName,
       timestamp: this.timestamp,
       text: this.text,
       mediaUrl: this.mediaUrl,

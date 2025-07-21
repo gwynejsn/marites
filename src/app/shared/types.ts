@@ -3,6 +3,7 @@ export type status = 'Online' | 'Offline';
 export type messageType = 'File' | 'Text' | 'Image';
 export type chatType = 'Group' | 'Private';
 export type userProfileStatus = 'uploading' | 'fetching' | 'fetched' | 'init';
+
 export type chatNameGroup = {
   type: 'group';
   name: string;

@@ -30,7 +30,7 @@ export class MessagePreview {
   static init(chatName: string, chatPhoto: string) {
     return new MessagePreview(
       chatName,
-      new Message('Text', '', '', '', '', Timestamp.now(), '', '', true),
+      new Message('Text', '', '', '', Timestamp.now(), '', '', true),
       chatPhoto,
       false
     );

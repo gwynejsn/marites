@@ -25,7 +25,33 @@
         class="w-[150px] h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-zinc-800"
         [src]="chat.chatPhoto"
         [alt]="chatName || 'Chat avatar'"
+        *ngIf="chat.type === 'Private'"
       />
+
+      <div *ngIf="chat.type === 'Group'" class="relative group w-fit">
+        <img
+          class="w-[150px] h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-zinc-800 group-hover:opacity-80 transition"
+          [src]="chat.chatPhoto"
+          [alt]="chatName || 'Chat avatar'"
+        />
+
+        <label
+          for="photo-upload"
+          class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition"
+        >
+          <i
+            class="fa-solid fa-pen-to-square fa-2xl text-white drop-shadow"
+          ></i>
+        </label>
+        <input
+          id="photo-upload"
+          type="file"
+          accept="image/*"
+          class="hidden"
+          (change)="changeGroupPhoto($event)"
+        />
+      </div>
+
       <h3
         class="text-xl font-semibold text-zinc-800 dark:text-white text-center"
       >
@@ -48,9 +74,18 @@
             type="color"
             [(ngModel)]="chatColor"
             class="w-[30px] h-[30px] rounded-full p-0 cursor-pointer border-none"
+            (change)="updateChatColor()"
           />
+
           <span class="text-sm text-zinc-700 dark:text-zinc-300">
             Chat color
+            <button
+              class="p-1 hover:text-red-400"
+              (click)="resetChatColor()"
+              *ngIf="chatColor !== '#6c5ce7'"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
           </span>
         </div>
       </div>
@@ -59,7 +94,7 @@
       <div class="flex items-center justify-between relative">
         <div class="flex items-center gap-4">
           <button
-            class="w-[30px] h-[30px] text-xl bg-primary hover:bg-primary/90 text-white rounded-full flex justify-center items-center transition"
+            class="w-[30px] h-[30px] text-xl bg-primary hover:bg-primary/90 text-white rounded-full flex justify-center items-center transition hover:cursor-pointer"
             [title]="'Quick Reaction: ' + quickReaction"
             (click)="chooseQuickReaction()"
           >
@@ -86,26 +121,26 @@
       </div>
     </div>
 
-    <!-- Nicknames Card -->
+    <!-- Names Card -->
     <div class="w-full bg-zinc-100 dark:bg-zinc-800 rounded-2xl shadow p-5">
       <h4 class="text-zinc-700 dark:text-zinc-200 font-semibold text-base mb-4">
-        Nicknames
+        Members
       </h4>
       <div
         *ngFor="let member of members"
-        class="text-sm text-zinc-800 dark:text-zinc-300 px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:cursor-pointer rounded-full"
-        (click)="changeMemberNickname = member.nickname; cdr.detectChanges()"
+        class="text-sm text-zinc-800 dark:text-zinc-300 px-2 py-1 rounded-full"
       >
-        {{ member.nickname }}
+        {{ member.name }}
       </div>
     </div>
+
+    <!-- <div class="w-full">
+      <button
+        *ngIf="chat.type === 'Private'"
+        class="p-4 bg-primary rounded-2xl"
+      >
+        change group name
+      </button>
+    </div> -->
   </div>
-  <app-input-box
-    *ngIf="changeMemberNickname.length > 0"
-    [data]="{
-      title: 'Change nickname',
-      placeholder: changeMemberNickname
-    }"
-    (cancel)="changeMemberNickname = ''"
-  ></app-input-box>
 </section>

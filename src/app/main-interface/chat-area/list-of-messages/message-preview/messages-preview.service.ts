@@ -59,7 +59,24 @@ export class MessagesPreviewService {
     );
   }
 
-  async createMessagePreview(
+  async createMessagePreviewForPrivate(
+    currUserMessagePreview: MessagePreview,
+    otherUserMessagePreview: MessagePreview,
+    chatUID: string,
+    currUserUID: string,
+    otherUserUID: string
+  ): Promise<void> {
+    await setDoc(
+      doc(this.firestore, `users/${currUserUID}/messagesPreview/${chatUID}`),
+      currUserMessagePreview.toFirestore()
+    );
+    await setDoc(
+      doc(this.firestore, `users/${otherUserUID}/messagesPreview/${chatUID}`),
+      otherUserMessagePreview.toFirestore()
+    );
+  }
+
+  async createMessagePreviewForGroup(
     messagePreview: MessagePreview,
     chatUID: string,
     membersUID: string[]

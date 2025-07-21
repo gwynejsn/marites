@@ -6,6 +6,7 @@ import {
   Firestore,
   onSnapshot,
   Timestamp,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
 import {
@@ -16,6 +17,7 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
+import { cloudinary } from '../../../environments/cloudinary';
 import { environment } from '../../../environments/environment.development';
 import { storeStructure } from '../../app.config';
 import { selectCurrUserUID } from '../../authentication/store/authentication.selectors';
@@ -78,11 +80,58 @@ export class ChatService {
       ...chatCreated.toJSON(),
     });
 
-    await this.messagesPreviewService.createMessagePreview(
-      MessagePreview.init(withName, chatCreated.chatPhoto),
+    await this.messagesPreviewService.createMessagePreviewForPrivate(
+      MessagePreview.init(withName, withProfilePicture),
+      MessagePreview.init(
+        this.userProfile.fullName,
+        this.userProfile.profilePicture
+      ),
       chatRef.id,
-      Object.keys(chatCreated.members)
+      userUID,
+      withUID
     );
+  }
+
+  async updateChat(chatUID: string, update: any) {
+    await updateDoc(doc(this.firestore, `chats/${chatUID}`), update);
+  }
+
+  async updateGroupPhoto(chatUID: string, photo: File, membersUID: string[]) {
+    // upload to cloudinary
+    try {
+      const data = new FormData();
+      data.append('file', photo);
+      data.append('upload_preset', cloudinary.presetName);
+
+      const endpoint = `https://api.cloudinary.com/v1_1/${cloudinary.cloudName}/upload`;
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body: data,
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Cloudinary upload failed: ${res.status} ${errText}`);
+      }
+
+      const photoLink = (await res.json()).url;
+
+      // change preview and chat photo
+      await this.updateChat(chatUID, {
+        chatPhoto: photoLink,
+      });
+      await this.messagesPreviewService.updateMessagePreview(
+        {
+          chatPhoto: photoLink,
+        },
+        chatUID,
+        membersUID
+      );
+    } catch (err) {
+      console.error('Failed to upload photo to cloudinary!');
+      console.error(err);
+    }
   }
 
   async selectChat(chatUID: string) {

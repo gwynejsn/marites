@@ -3,7 +3,9 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  EventEmitter,
   OnDestroy,
+  Output,
   ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -34,9 +36,24 @@ import { MessageComponent } from './message/message.component';
   templateUrl: './chat-window.component.html',
 })
 export class ChatWindowComponent implements OnDestroy {
+  // init
   chat: Chat | null = null;
+  chatSub!: Subscription;
+  messagesSub!: Subscription;
+
+  @ViewChild('scrollDiv') private scrollDiv!: ElementRef;
+  scrollToBottom() {
+    setTimeout(() => {
+      this.scrollDiv.nativeElement.scrollTop =
+        this.scrollDiv.nativeElement.scrollHeight;
+    });
+  }
+
+  // header
   chatUID!: string;
   chatName!: string;
+
+  // inputs
   messages: { id: string; message: Message }[] | null = null;
   textContent: string | null = null;
   photosSelected: File[] = [];
@@ -45,21 +62,33 @@ export class ChatWindowComponent implements OnDestroy {
     url: string;
   }[] = [];
 
+  // image preview
   messageViewed: { id: string; message: Message } | null = null;
 
-  chatSub!: Subscription;
-  messagesSub!: Subscription;
-
+  // chat info toggle
   showChatInfo = false;
+
+  // mobile view
+  @Output() back = new EventEmitter();
+  isMobile = false;
 
   constructor(
     private chatService: ChatService,
     private messageService: MessageService,
     private messagesPreviewService: MessagesPreviewService,
-    private cdr: ChangeDetectorRef,
+    public cdr: ChangeDetectorRef,
     private store$: Store<storeStructure>
   ) {
     this.load();
+  }
+
+  ngOnInit() {
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 768; // md breakpoint
   }
 
   ngOnDestroy(): void {
@@ -88,14 +117,6 @@ export class ChatWindowComponent implements OnDestroy {
           this.cdr.detectChanges();
           this.scrollToBottom();
         });
-    });
-  }
-
-  @ViewChild('scrollDiv') private scrollDiv!: ElementRef;
-  scrollToBottom() {
-    setTimeout(() => {
-      this.scrollDiv.nativeElement.scrollTop =
-        this.scrollDiv.nativeElement.scrollHeight;
     });
   }
 
