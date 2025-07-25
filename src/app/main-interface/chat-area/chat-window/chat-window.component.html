@@ -20,7 +20,7 @@
       <div class="flex items-center gap-4">
         <img
           class="w-[50px] h-[50px] rounded-full object-cover"
-          [src]="chat()?.chatPhoto"
+          [src]="chatPhoto"
           [alt]="chatName || 'Chat avatar'"
         />
         <div class="flex flex-col">
@@ -157,6 +157,7 @@
     [chat]="chat"
     [chatUID]="chatUID"
     [chatName]="chatName"
+    [chatPhoto]="chatPhoto"
     (closeChatInfo)="closeChatInfo()"
   ></app-chat-info>
 </ng-template>

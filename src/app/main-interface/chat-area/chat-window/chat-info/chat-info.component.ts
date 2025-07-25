@@ -33,6 +33,7 @@ export class ChatInfoComponent implements OnInit {
   @Input() chat!: Signal<Chat | null>;
   @Input() chatUID!: string;
   @Input() chatName!: string;
+  @Input() chatPhoto!: string;
   @Output() closeChatInfo = new EventEmitter();
 
   currUserUID!: string | null;

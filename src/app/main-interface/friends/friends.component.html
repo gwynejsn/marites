@@ -55,7 +55,7 @@
       >
         <div
           *ngFor="let f of filteredFriends"
-          class="p-4 rounded-md w-full flex justify-between items-center border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
+          class="p-4 rounded-md w-full flex justify-between items-center border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 group"
         >
           <div class="flex gap-4 items-center">
             <img
@@ -67,6 +67,27 @@
               {{ f.friend.name }}
             </p>
           </div>
+          <button
+            class="hidden group-hover:flex mr-4"
+            (click)="confirmUnfriend.set(true)"
+          >
+            <i
+              class="fa-solid fa-user-minus fa-xl text-red-400 hover:opacity-90"
+            ></i>
+          </button>
+          <app-confirm-dialog
+            *ngIf="confirmUnfriend()"
+            [data]="{
+              mainMessage: 'Are you sure to unfriend ' + f.friend.name,
+              description: 'By unfriending, your private chat will be deleted!',
+              cancelText: 'cancel',
+              confirmText: 'unfriend'
+            }"
+            (cancel)="confirmUnfriend.set(false)"
+            (confirm)="
+              friendsService.unfriend(f.id); confirmUnfriend.set(false)
+            "
+          ></app-confirm-dialog>
         </div>
 
         <div

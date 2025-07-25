@@ -23,7 +23,7 @@
     <div class="flex flex-col items-center gap-3">
       <img
         class="w-[150px] h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-zinc-800"
-        [src]="chat()?.chatPhoto"
+        [src]="chatPhoto"
         [alt]="chatName || 'Chat avatar'"
         *ngIf="chat()?.type === 'Private'"
       />
@@ -35,7 +35,7 @@
         >
           <img
             class="w-[150px] h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-zinc-800 group-hover:opacity-80 transition"
-            [src]="chat()?.chatPhoto"
+            [src]="chatPhoto"
             [alt]="chatName || 'Chat avatar'"
           />
 

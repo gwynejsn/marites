@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
+import { chatType } from '../types';
 import { Message } from './message';
 
 export class MessagePreview {
@@ -6,7 +7,9 @@ export class MessagePreview {
     public chatName: string,
     public lastMessage: Message,
     public chatPhoto: string,
-    public read: boolean
+    public read: boolean,
+    public memberUIDs: string[],
+    public chatType: chatType
   ) {}
 
   toFirestore(): object {
@@ -15,6 +18,8 @@ export class MessagePreview {
       lastMessage: this.lastMessage.toFirestore(),
       chatPhoto: this.chatPhoto,
       read: this.read,
+      memberUIDs: this.memberUIDs,
+      chatType: this.chatType,
     };
   }
 
@@ -23,16 +28,25 @@ export class MessagePreview {
       json.chatName,
       Message.fromJSON(json.lastMessage),
       json.chatPhoto,
-      json.read
+      json.read,
+      json.memberUIDs,
+      json.chatType
     );
   }
 
-  static init(chatName: string, chatPhoto: string) {
+  static init(
+    chatName: string,
+    chatPhoto: string,
+    memberUIDs: string[],
+    chatType: chatType
+  ) {
     return new MessagePreview(
       chatName,
       new Message('Text', '', '', '', Timestamp.now(), '', '', true),
       chatPhoto,
-      false
+      false,
+      memberUIDs,
+      chatType
     );
   }
 }

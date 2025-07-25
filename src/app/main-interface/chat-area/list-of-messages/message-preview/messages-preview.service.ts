@@ -90,7 +90,40 @@ export class MessagesPreviewService {
       );
   }
 
+  async removeMessagePreviews(chatUID: string, membersUID: string[]) {
+    for (const m of membersUID)
+      await deleteDoc(
+        doc(this.firestore, `users/${m}/messagesPreview/${chatUID}`)
+      );
+  }
+
   async removeMessagePreviewFrom(memberUID: string, chatUID: string) {
+    // updating the memberUIDs as well
+    // get message preview first
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+    const preview = MessagePreview.fromJSON(
+      (
+        await getDoc(
+          doc(this.firestore, `users/${userUID}/messagesPreview/${chatUID}`)
+        )
+      ).data()
+    );
+
+    if (!preview) throw new Error('Message preview not found');
+
+    // update my preview
+    const updatedPreview = preview.memberUIDs.filter((p) => p !== memberUID);
+
+    await updateDoc(
+      doc(this.firestore, `users/${userUID}/messagesPreview/${chatUID}`),
+      {
+        ...updatedPreview,
+      }
+    );
+
+    // delete from his preview
     await deleteDoc(
       doc(this.firestore, `users/${memberUID}/messagesPreview/${chatUID}`)
     );
@@ -101,16 +134,28 @@ export class MessagesPreviewService {
     const userUID = await firstValueFrom(
       this.store$.pipe(select(selectCurrUserUID))
     );
-    const docSnap = await getDoc(
-      doc(this.firestore, `users/${userUID}/messagesPreview/${chatUID}`)
+    const preview = MessagePreview.fromJSON(
+      (
+        await getDoc(
+          doc(this.firestore, `users/${userUID}/messagesPreview/${chatUID}`)
+        )
+      ).data()
     );
 
-    if (!docSnap.exists()) throw new Error('Message preview not found');
+    if (!preview) throw new Error('Message preview not found');
+
+    preview.memberUIDs.push(memberUID);
+
+    // update my preview
+    await updateDoc(
+      doc(this.firestore, `users/${userUID}/messagesPreview/${chatUID}`),
+      preview.toFirestore()
+    );
 
     // add to his preview
     await setDoc(
       doc(this.firestore, `users/${memberUID}/messagesPreview/${chatUID}`),
-      docSnap.data()
+      preview.toFirestore()
     );
   }
 

@@ -52,6 +52,7 @@ export class ChatWindowComponent implements OnDestroy {
   // header
   chatUID!: string;
   chatName!: string;
+  chatPhoto!: string;
 
   // inputs
   messages = signal<{ id: string; message: Message }[] | null>(null);
@@ -104,10 +105,20 @@ export class ChatWindowComponent implements OnDestroy {
     this.chatSub = this.chatService.getChat().subscribe((c) => {
       this.chat.set(c.chat);
       this.chatUID = c.id;
-      if (c.chat.chatName.type === 'private' && currUserUID)
+      if (
+        c.chat.chatName.type === 'private' &&
+        c.chat.chatPhoto.type === 'private' &&
+        currUserUID
+      ) {
         this.chatName = c.chat.chatName.names[currUserUID] ?? 'Unknown';
-      else if (c.chat.chatName.type === 'group')
+        this.chatPhoto = c.chat.chatPhoto.photos[currUserUID] ?? '';
+      } else if (
+        c.chat.chatName.type === 'group' &&
+        c.chat.chatPhoto.type === 'group'
+      ) {
         this.chatName = c.chat.chatName.name ?? 'Unknown';
+        this.chatPhoto = c.chat.chatPhoto.photo ?? '';
+      }
 
       this.messagesSub = this.messageService
         .getMessages(this.chatUID)

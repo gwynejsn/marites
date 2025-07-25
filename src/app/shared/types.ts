@@ -18,6 +18,20 @@ export type chatNamePrivate = {
 
 export type chatNameMap = chatNameGroup | chatNamePrivate;
 
+export type chatPhotoGroup = {
+  type: 'group';
+  photo: string;
+};
+
+export type chatPhotoPrivate = {
+  type: 'private';
+  photos: {
+    [uid: string]: string;
+  };
+};
+
+export type chatPhotoMap = chatPhotoGroup | chatPhotoPrivate;
+
 export type chatMemberMap = {
   [uid: string]: {
     name: string;

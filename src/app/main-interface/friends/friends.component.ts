@@ -3,6 +3,7 @@ import { Component, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
+import { ConfirmDialogComponent } from '../../generic/confirm-dialog/confirm-dialog.component';
 import { Friend } from '../../shared/model/friend.model';
 import { SearchByNamePipe } from '../../shared/pipes/search-by-name.pipe';
 import { FriendRequestsComponent } from './friend-requests/friend-requests.component';
@@ -18,6 +19,7 @@ import { FriendsService } from './friends.service';
     CommonModule,
     FormsModule,
     SearchByNamePipe,
+    ConfirmDialogComponent,
   ],
   templateUrl: './friends.component.html',
 })
@@ -34,7 +36,9 @@ export class FriendsComponent implements OnDestroy {
   toggleSearchBar = signal(false);
   searchTerm = '';
 
-  constructor(private friendsService: FriendsService) {
+  confirmUnfriend = signal(false);
+
+  constructor(public friendsService: FriendsService) {
     this.loadFriends();
     // this.mock();
   }

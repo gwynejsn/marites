@@ -68,7 +68,10 @@ export class ChatService {
         type: 'group',
         name: groupChatName,
       },
-      chatPhotoLink,
+      {
+        type: 'group',
+        photo: chatPhotoLink,
+      },
       environment.defaultQuickReaction,
       null,
       members
@@ -79,7 +82,12 @@ export class ChatService {
     });
 
     await this.messagesPreviewService.createMessagePreviewForGroup(
-      MessagePreview.init(groupChatName, chatPhotoLink),
+      MessagePreview.init(
+        groupChatName,
+        chatPhotoLink,
+        Object.keys(members),
+        'Group'
+      ),
       chatRef.id,
       Object.keys(members)
     );
@@ -106,7 +114,13 @@ export class ChatService {
           [userUID]: withName,
         },
       },
-      withProfilePicture,
+      {
+        type: 'private',
+        photos: {
+          [withUID]: this.userProfile.profilePicture,
+          [userUID]: withProfilePicture,
+        },
+      },
       environment.defaultQuickReaction,
       null,
       {
@@ -123,10 +137,17 @@ export class ChatService {
     });
 
     await this.messagesPreviewService.createMessagePreviewForPrivate(
-      MessagePreview.init(withName, withProfilePicture),
+      MessagePreview.init(
+        withName,
+        withProfilePicture,
+        [withUID, userUID],
+        'Private'
+      ),
       MessagePreview.init(
         this.userProfile.fullName,
-        this.userProfile.profilePicture
+        this.userProfile.profilePicture,
+        [withUID, userUID],
+        'Private'
       ),
       chatRef.id,
       userUID,
@@ -266,8 +287,9 @@ export class ChatService {
 
   async deleteChat(chatUID: string, membersUID: string[]) {
     // delete from previews
-    membersUID.forEach((m) =>
-      this.messagesPreviewService.removeMessagePreviewFrom(m, chatUID)
+    await this.messagesPreviewService.removeMessagePreviews(
+      chatUID,
+      membersUID
     );
 
     // delete chat
