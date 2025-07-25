@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
 import {
-  ChangeDetectorRef,
   Component,
   EventEmitter,
+  Inject,
   OnDestroy,
   Output,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { SpeechRecognitionService } from '@ng-web-apis/speech';
+import { Observable, Subscription } from 'rxjs';
+
 import { MessagePreview } from '../../../shared/model/message-preview';
 import { PreviewsSortByDatePipe } from '../../../shared/pipes/previews-sort-by-date.pipe';
 import { SearchByNamePipe } from '../../../shared/pipes/search-by-name.pipe';
@@ -33,23 +35,27 @@ export class ListOfMessagesComponent implements OnDestroy {
   messages!: { previewId: string; preview: MessagePreview }[];
 
   private previewsSub!: Subscription;
+  private recognitionSub!: Subscription;
 
   @Output() chatSelected = new EventEmitter();
 
   showCreateGroupChat = false;
-
   searchTerm = '';
+
+  isListening = false;
 
   constructor(
     private messagesPreviewService: MessagesPreviewService,
     public chatService: ChatService,
-    public cdr: ChangeDetectorRef
+    @Inject(SpeechRecognitionService)
+    private readonly recognition$: Observable<SpeechRecognitionResult[]>
   ) {
     this.load();
   }
 
   ngOnDestroy(): void {
     if (this.previewsSub) this.previewsSub.unsubscribe();
+    if (this.recognitionSub) this.recognitionSub.unsubscribe();
   }
 
   load() {
@@ -61,5 +67,29 @@ export class ListOfMessagesComponent implements OnDestroy {
           preview: p.preview,
         }));
       });
+  }
+
+  initSpeechRecognition() {
+    // If already listening, cancel it
+    if (this.isListening) {
+      this.isListening = false;
+      if (this.recognitionSub) {
+        this.recognitionSub.unsubscribe();
+        this.recognitionSub = undefined!;
+      }
+      return;
+    }
+
+    // Start listening
+    this.isListening = true;
+    this.recognitionSub = this.recognition$.subscribe((results) => {
+      const transcript = Array.from(results)
+        .map((result) => result[0].transcript)
+        .join(' ')
+        .trim();
+
+      this.searchTerm = transcript;
+      this.isListening = false;
+    });
   }
 }

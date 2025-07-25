@@ -17,6 +17,8 @@
     />
     <button
       class="absolute right-2 top-1.5 w-8 h-8 bg-primary hover:bg-primary/90 text-white rounded-full flex justify-center items-center transition"
+      [class.animate-pulse]="isListening"
+      (click)="initSpeechRecognition()"
     >
       <i class="fas fa-microphone text-sm"></i>
     </button>
