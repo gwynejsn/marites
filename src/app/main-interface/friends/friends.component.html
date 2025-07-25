@@ -3,37 +3,79 @@
 >
   <!-- Friends Section -->
   <section
-    class="flex flex-col min-w-[30%] items-center py-2 px-4 border-2 rounded-lg border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 sm:h-[30vh] md:h-full overflow-y-auto"
+    class="flex flex-col min-w-[30%] items-center py-2 px-4 border-2 rounded-lg border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 sm:h-[30vh] md:h-full overflow-y-auto pt-4"
   >
-    <div class="flex justify-between items-center w-full mb-4">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <!-- Default Header (Title + Search Icon) -->
+    <div
+      class="flex justify-between items-center w-full mb-4"
+      *ngIf="!toggleSearchBar(); else searchBar"
+    >
+      <h3 class="text-xl font-semibold text-zinc-900 dark:text-white">
         My Friends
       </h3>
+
       <button
-        class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+        class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
         aria-label="Search Friends"
+        (click)="toggleSearchBar.set(true)"
       >
-        <i class="fas fa-search text-gray-700 dark:text-gray-200"></i>
+        <i class="fas fa-search text-zinc-600 dark:text-zinc-300"></i>
       </button>
     </div>
 
+    <!-- Search Bar -->
+    <ng-template #searchBar>
+      <div class="flex items-center w-full gap-2 mb-4">
+        <div class="relative w-full">
+          <input
+            type="text"
+            placeholder="Search friends..."
+            class="w-full h-11 pl-4 pr-10 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-sm text-zinc-800 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary transition shadow-sm"
+            [(ngModel)]="searchTerm"
+          />
+          <i
+            class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 pointer-events-none"
+          ></i>
+        </div>
+
+        <button
+          class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+          aria-label="Close Search"
+          (click)="toggleSearchBar.set(false)"
+        >
+          <i class="fas fa-times text-zinc-600 dark:text-zinc-300"></i>
+        </button>
+      </div>
+    </ng-template>
+
     <!-- Friend List -->
     <div class="w-full flex-1 overflow-y-auto space-y-4" *ngIf="!loading">
-      <div
-        *ngFor="let f of friends"
-        class="p-4 rounded-md w-full flex justify-between items-center border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
+      <ng-container
+        *ngIf="friends | searchByName : searchTerm as filteredFriends"
       >
-        <div class="flex gap-4 items-center">
-          <img
-            [src]="f.friend.profilePicture"
-            [alt]="'Profile picture of ' + f.friend.name"
-            class="w-[60px] h-[60px] rounded-full object-cover border border-gray-300 dark:border-zinc-500"
-          />
-          <p class="text-gray-800 dark:text-gray-100 font-medium">
-            {{ f.friend.name }}
-          </p>
+        <div
+          *ngFor="let f of filteredFriends"
+          class="p-4 rounded-md w-full flex justify-between items-center border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
+        >
+          <div class="flex gap-4 items-center">
+            <img
+              [src]="f.friend.profilePicture"
+              [alt]="'Profile picture of ' + f.friend.name"
+              class="w-[60px] h-[60px] rounded-full object-cover border border-gray-300 dark:border-zinc-500"
+            />
+            <p class="text-gray-800 dark:text-gray-100 font-medium">
+              {{ f.friend.name }}
+            </p>
+          </div>
         </div>
-      </div>
+
+        <div
+          *ngIf="filteredFriends.length === 0"
+          class="text-center text-zinc-500 mt-8"
+        >
+          No friend with term '{{ searchTerm }}' found.
+        </div>
+      </ng-container>
 
       <p
         *ngIf="friends.length === 0"
