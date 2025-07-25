@@ -16,8 +16,8 @@ export class InputBoxComponent {
     confirmText?: string;
   };
 
-  @Output() cancel = new EventEmitter<void>();
   @Output() confirm = new EventEmitter<string>();
+  @Output() cancel = new EventEmitter<void>();
 
   value: string = '';
 

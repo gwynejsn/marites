@@ -21,4 +21,19 @@ export class MessageComponent {
       else this.isUser = false;
     });
   }
+
+  getFormattedTimestamp(date: Date): string {
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } else {
+      return date.toLocaleDateString();
+    }
+  }
 }

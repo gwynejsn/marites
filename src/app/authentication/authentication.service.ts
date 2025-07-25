@@ -12,6 +12,7 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 import { removeUserProfile } from '../main-interface/user-profile/store/user-profile.actions';
 import { UserProfileService } from '../main-interface/user-profile/user-profile.service';
+import { CloudinaryService } from '../shared/cloudinary.service';
 import { UserProfile } from '../shared/model/user-profile.model';
 import { gender, signUpForm } from '../shared/types';
 import {
@@ -31,7 +32,8 @@ export class AuthenticationService {
     private auth: Auth,
     private userProfileService: UserProfileService,
     private store$: Store,
-    private router: Router
+    private router: Router,
+    private cloudinaryService: CloudinaryService
   ) {
     this.authState$ = authState(auth);
   }
@@ -49,9 +51,7 @@ export class AuthenticationService {
       // create user profile
       let imgUrl;
       if (form.profilePicture)
-        imgUrl = await this.userProfileService.uploadProfilePicture(
-          form.profilePicture
-        );
+        imgUrl = await this.cloudinaryService.upload(form.profilePicture);
       else imgUrl = environment.defaultProfilePicture;
 
       const newUserProfile = new UserProfile(
@@ -65,6 +65,7 @@ export class AuthenticationService {
       );
 
       // upload user profile
+
       await this.userProfileService.addUserProfile(newUserProfile);
       this.store$.dispatch(signUpSuccess({ uid: accCreatedRef.user.uid })); // set loading to false
       this.router.navigate(['/chat-area']);

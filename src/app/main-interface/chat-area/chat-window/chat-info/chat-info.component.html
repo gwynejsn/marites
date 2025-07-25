@@ -3,7 +3,7 @@
 >
   <div
     class="absolute top-0 left-0 w-full h-full z-40"
-    *ngIf="selectQuickReaction"
+    *ngIf="selectQuickReaction()"
     (click)="closeChooseQuickReaction()"
   ></div>
 
@@ -23,26 +23,27 @@
     <div class="flex flex-col items-center gap-3">
       <img
         class="w-[150px] h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-zinc-800"
-        [src]="chat.chatPhoto"
+        [src]="chat()?.chatPhoto"
         [alt]="chatName || 'Chat avatar'"
-        *ngIf="chat.type === 'Private'"
+        *ngIf="chat()?.type === 'Private'"
       />
 
-      <div *ngIf="chat.type === 'Group'" class="relative group w-fit">
-        <img
-          class="w-[150px] h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-zinc-800 group-hover:opacity-80 transition"
-          [src]="chat.chatPhoto"
-          [alt]="chatName || 'Chat avatar'"
-        />
-
+      <div *ngIf="chat()?.type === 'Group'" class="relative w-fit group">
         <label
           for="photo-upload"
-          class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition"
+          class="cursor-pointer block relative w-fit group"
         >
+          <img
+            class="w-[150px] h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-zinc-800 group-hover:opacity-80 transition"
+            [src]="chat()?.chatPhoto"
+            [alt]="chatName || 'Chat avatar'"
+          />
+
           <i
-            class="fa-solid fa-pen-to-square fa-2xl text-white drop-shadow"
+            class="fa-solid fa-pen-to-square fa-2xl text-white drop-shadow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition"
           ></i>
         </label>
+
         <input
           id="photo-upload"
           type="file"
@@ -54,9 +55,42 @@
 
       <h3
         class="text-xl font-semibold text-zinc-800 dark:text-white text-center"
+        *ngIf="chat()?.type === 'Private'"
       >
         {{ chatName }}
       </h3>
+
+      <div
+        class="flex items-center gap-2 group"
+        *ngIf="chat()?.type === 'Group'"
+        (click)="toggleChangeGroupName.set(true)"
+      >
+        <h3
+          class="text-xl font-semibold text-zinc-800 dark:text-white text-center"
+          *ngIf="!toggleChangeGroupName(); else groupChatNameInput"
+        >
+          {{ chatName }}
+        </h3>
+        <button class="hidden group-hover:flex items-center">
+          <i
+            class="fa-solid fa-pen-to-square fa-lg text-zinc-800 dark:text-white drop-shadow transition"
+          ></i>
+        </button>
+      </div>
+      <ng-template #groupChatNameInput>
+        <app-input-box
+          (cancel)="toggleChangeGroupName.set(false)"
+          (confirm)="
+            changeGroupChatName($event); toggleChangeGroupName.set(false)
+          "
+          [data]="{
+            title: 'Change Group Chat Name',
+            defaultValue: chatName,
+            cancelText: 'cancel',
+            confirmText: 'change'
+          }"
+        ></app-input-box>
+      </ng-template>
     </div>
 
     <!-- Customization Card -->
@@ -107,7 +141,7 @@
 
         <!-- Emoji Picker Dropdown -->
         <div
-          *ngIf="selectQuickReaction"
+          *ngIf="selectQuickReaction()"
           class="absolute left-0 top-full mt-2 grid grid-cols-5 gap-2 bg-zinc-700 p-3 rounded-2xl z-50 w-[180px] shadow-lg"
         >
           <div
@@ -126,21 +160,112 @@
       <h4 class="text-zinc-700 dark:text-zinc-200 font-semibold text-base mb-4">
         Members
       </h4>
-      <div
-        *ngFor="let member of members"
-        class="text-sm text-zinc-800 dark:text-zinc-300 px-2 py-1 rounded-full"
-      >
-        {{ member.name }}
+      <div *ngIf="chat()?.type === 'Private'; else groupMembers">
+        <div
+          *ngFor="let member of members()"
+          class="text-sm text-zinc-800 dark:text-zinc-300 px-2 py-1 rounded-full"
+        >
+          {{ member.name }}
+        </div>
       </div>
-    </div>
+      <ng-template #groupMembers>
+        <div
+          *ngFor="let member of members()"
+          class="text-sm text-zinc-800 dark:text-zinc-300 px-2 py-1 rounded-full group flex gap-2 items-center"
+        >
+          {{ member.name }}
+          <button
+            *ngIf="member.uid !== currUserUID"
+            class="hidden group-hover:flex"
+            (click)="removeMemberUID.set(member.uid)"
+          >
+            <i class="fa-solid fa-user-minus text-red-400"></i>
+          </button>
 
-    <!-- <div class="w-full">
-      <button
-        *ngIf="chat.type === 'Private'"
-        class="p-4 bg-primary rounded-2xl"
-      >
-        change group name
-      </button>
-    </div> -->
+          <app-confirm-dialog
+            *ngIf="removeMemberUID() === member.uid"
+            [data]="{
+              mainMessage:
+                'Are you sure you want to remove ' + member.name + '?',
+              description: 'By confirming, this cannot be undone!',
+              cancelText: 'cancel',
+              confirmText: 'remove'
+            }"
+            (cancel)="removeMemberUID.set(null)"
+            (confirm)="
+              chatService.removeMember(chatUID, chat()?.members!, member.uid);
+              removeMemberUID.set(null)
+            "
+          ></app-confirm-dialog>
+        </div>
+
+        <!-- Adding members -->
+        <button
+          class="py-2 px-4 bg-zinc-700 rounded-2xl mt-2 hover:bg-zinc-600"
+          (click)="toggleAddMember.set(true)"
+        >
+          Add member
+        </button>
+        <app-friends-list
+          *ngIf="toggleAddMember()"
+          [membersUIDs]="membersUIDs"
+          (close)="toggleAddMember.set(false)"
+          (addMember)="chatService.addMember($event, chatUID, chat()?.members!)"
+        ></app-friends-list>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Leave / Delete Chat Buttons -->
+  <div class="flex flex-col gap-3 w-full">
+    <button
+      class="w-full py-3 px-4 text-sm font-medium bg-zinc-700 text-zinc-50 rounded-xl hover:bg-red-500 hover:text-white transition"
+      (click)="confirmLeaveChat.set(true)"
+    >
+      <i class="fa-solid fa-right-from-bracket mr-2"></i>
+      Leave Chat
+    </button>
+
+    <button
+      class="w-full py-3 px-4 text-sm font-medium bg-zinc-700 text-zinc-50 rounded-xl hover:bg-red-500 hover:text-white transition"
+      (click)="confirmDeleteChat.set(true)"
+    >
+      <i class="fa-solid fa-trash-can mr-2"></i>
+      Delete Chat
+    </button>
+
+    <!-- Leave Chat Confirmation -->
+    <app-confirm-dialog
+      *ngIf="confirmLeaveChat()"
+      [data]="{
+        mainMessage: 'Leave this chat?',
+        description:
+          'You will no longer receive messages from this chat unless re-added.',
+        cancelText: 'cancel',
+        confirmText: 'leave'
+      }"
+      (cancel)="confirmLeaveChat.set(false)"
+      (confirm)="
+        chatService.leaveChat(chatUID, chat()?.members!);
+        confirmLeaveChat.set(false)
+      "
+    ></app-confirm-dialog>
+
+    <!-- Delete Chat Confirmation -->
+    <app-confirm-dialog
+      *ngIf="confirmDeleteChat()"
+      [data]="{
+        mainMessage: 'Delete this chat?',
+        description:
+          'This action is permanent and will remove the chat for all participants.',
+        cancelText: 'cancel',
+        confirmText: 'delete'
+      }"
+      (cancel)="confirmDeleteChat.set(false)"
+      (confirm)="
+        chatService.deleteChat(chatUID, membersUIDs());
+        confirmDeleteChat.set(false)
+      "
+    ></app-confirm-dialog>
   </div>
 </section>

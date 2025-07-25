@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import {
-  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
   OnDestroy,
   Output,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -37,7 +37,7 @@ import { MessageComponent } from './message/message.component';
 })
 export class ChatWindowComponent implements OnDestroy {
   // init
-  chat: Chat | null = null;
+  chat = signal<Chat | null>(null);
   chatSub!: Subscription;
   messagesSub!: Subscription;
 
@@ -54,19 +54,21 @@ export class ChatWindowComponent implements OnDestroy {
   chatName!: string;
 
   // inputs
-  messages: { id: string; message: Message }[] | null = null;
-  textContent: string | null = null;
-  photosSelected: File[] = [];
-  photosSelectedPreview: {
-    name: string;
-    url: string;
-  }[] = [];
+  messages = signal<{ id: string; message: Message }[] | null>(null);
+  textContent = signal<string | null>(null);
+  photosSelected = signal<File[]>([]);
+  photosSelectedPreview = signal<
+    {
+      name: string;
+      url: string;
+    }[]
+  >([]);
 
   // image preview
-  messageViewed: { id: string; message: Message } | null = null;
+  messageViewed = signal<{ id: string; message: Message } | null>(null);
 
   // chat info toggle
-  showChatInfo = false;
+  showChatInfo = signal(false);
 
   // mobile view
   @Output() back = new EventEmitter();
@@ -76,7 +78,6 @@ export class ChatWindowComponent implements OnDestroy {
     private chatService: ChatService,
     private messageService: MessageService,
     private messagesPreviewService: MessagesPreviewService,
-    public cdr: ChangeDetectorRef,
     private store$: Store<storeStructure>
   ) {
     this.load();
@@ -101,30 +102,28 @@ export class ChatWindowComponent implements OnDestroy {
       this.store$.pipe(select(selectCurrUserUID))
     );
     this.chatSub = this.chatService.getChat().subscribe((c) => {
-      this.chat = c.chat;
+      this.chat.set(c.chat);
       this.chatUID = c.id;
       if (c.chat.chatName.type === 'private' && currUserUID)
         this.chatName = c.chat.chatName.names[currUserUID] ?? 'Unknown';
       else if (c.chat.chatName.type === 'group')
         this.chatName = c.chat.chatName.name ?? 'Unknown';
 
-      this.cdr.detectChanges();
-
       this.messagesSub = this.messageService
         .getMessages(this.chatUID)
         .subscribe((m) => {
-          this.messages = m;
-          this.cdr.detectChanges();
+          this.messages.set(m);
           this.scrollToBottom();
         });
     });
   }
 
   async sendQuickReaction() {
-    if (this.chat?.quickReaction) {
+    const chat = this.chat();
+    if (chat) {
       const message = await this.messageService.sendTextMessage(
-        this.chat.quickReaction,
-        this.chat,
+        chat.quickReaction,
+        chat,
         this.chatUID
       );
       await this.updateMessagePreview(message);
@@ -135,28 +134,28 @@ export class ChatWindowComponent implements OnDestroy {
     let messageSent: Message | null = null;
     // send photos
 
-    if (this.chat && this.photosSelected) {
+    if (this.chat() && this.photosSelected) {
       const messagesSent = await this.messageService.sendPhotos(
-        this.photosSelected,
-        this.chat,
+        this.photosSelected(),
+        this.chat() as Chat,
         this.chatUID
       );
       if (messageSent) messageSent = messageSent[messagesSent.length - 1];
     }
 
     // send text
-    if (this.chat && this.textContent)
+    if (this.chat() && this.textContent)
       messageSent = await this.messageService.sendTextMessage(
-        this.textContent,
-        this.chat,
+        this.textContent()!,
+        this.chat() as Chat,
         this.chatUID
       );
 
     if (messageSent) await this.updateMessagePreview(messageSent);
 
-    this.textContent = null;
-    this.photosSelected = [];
-    this.photosSelectedPreview = [];
+    this.textContent.set(null);
+    this.photosSelected.set([]);
+    this.photosSelectedPreview.set([]);
   }
 
   async updateMessagePreview(message: Message) {
@@ -167,71 +166,63 @@ export class ChatWindowComponent implements OnDestroy {
       await firstValueFrom(this.store$.pipe(select(selectUserProfile)))
     ).userProfile;
 
-    if (!userUID || !this.chat || !userProfile) throw 'User not authenticated!';
+    if (!userUID || !this.chat() || !userProfile)
+      throw 'User not authenticated!';
 
     this.messagesPreviewService.updateMessagePreview(
       {
         chatUID: this.chatUID,
         lastMessage: message.toFirestore(),
+        read: false,
       },
       this.chatUID,
-      Object.keys(this.chat.members)
+      Object.keys((this.chat() as Chat).members)
     );
   }
 
   addPhoto(event: Event) {
-    console.log('adding photo');
-
     const photo = (event.target as HTMLInputElement).files?.[0];
     if (photo) {
-      this.photosSelected.push(photo);
+      this.photosSelected.update((p) => [...p, photo]);
       const reader = new FileReader();
       reader.onload = () => {
         if (typeof reader.result === 'string') {
-          this.photosSelectedPreview.push({
-            name: photo.name,
-            url: reader.result,
-          });
-          this.cdr.detectChanges();
+          this.photosSelectedPreview.update((p) => [
+            ...p,
+            {
+              name: photo.name,
+              url: reader.result as string,
+            },
+          ]);
         }
       };
       reader.readAsDataURL(photo);
-      console.log(this.photosSelected);
     }
   }
 
   removePhoto(name: string) {
-    console.log('removing ', name);
-
-    this.photosSelected = this.photosSelected.filter((p) => p.name !== name);
-    this.photosSelectedPreview = this.photosSelectedPreview.filter(
-      (p) => p.name !== name
+    this.photosSelected.update((p) => p.filter((photo) => photo.name !== name));
+    this.photosSelectedPreview.update((p) =>
+      p.filter((photo) => photo.name !== name)
     );
-    this.cdr.detectChanges();
   }
 
   viewMessage(message: { id: string; message: Message }) {
-    console.log('viewing');
-
     if (message.message.type === 'Image') {
-      this.messageViewed = message;
-      this.cdr.detectChanges();
+      this.messageViewed.set(message);
     }
   }
 
   closeMessage() {
-    this.messageViewed = null;
-    this.cdr.detectChanges();
+    this.messageViewed.set(null);
   }
 
   viewChatInfo() {
-    this.showChatInfo = true;
-    this.cdr.detectChanges();
+    this.showChatInfo.set(true);
   }
 
   closeChatInfo() {
-    this.showChatInfo = false;
+    this.showChatInfo.set(false);
     this.scrollToBottom();
-    this.cdr.detectChanges();
   }
 }

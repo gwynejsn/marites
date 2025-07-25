@@ -64,7 +64,7 @@
         'ml-1': !isUser
       }"
     >
-      {{ message.timestamp.toDate() | date : "shortTime" }}
+      {{ getFormattedTimestamp(message.timestamp.toDate()) }}
     </p>
   </div>
 </div>

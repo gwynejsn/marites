@@ -16,6 +16,7 @@ import { Friend } from '../../../../shared/model/friend.model';
 import { chatMemberMap } from '../../../../shared/types';
 import { FriendsService } from '../../../friends/friends.service';
 import { selectUserProfile } from '../../../user-profile/store/user-profile.selectors';
+import { ChatService } from '../../chat.service';
 
 @Component({
   selector: 'app-create-group-chat',
@@ -47,17 +48,20 @@ export class CreateGroupChatComponent {
 
   isValid = computed(
     () =>
-      Object.keys(this.chatMembers()).length > 1 && this.chatName().length > 0
+      Object.keys(this.chatMembers()).length > 1 &&
+      this.chatName().length > 0 &&
+      this.chatPhoto !== null
   );
 
-  @Output() cancel = new EventEmitter();
+  @Output() back = new EventEmitter();
   step = signal(1);
 
   currUserUID: string | null = null;
 
   constructor(
     private friendsService: FriendsService,
-    private store$: Store<storeStructure>
+    private store$: Store<storeStructure>,
+    private chatService: ChatService
   ) {
     store$
       .pipe(select(selectCurrUserUID))
@@ -130,5 +134,14 @@ export class CreateGroupChatComponent {
     }
   }
 
-  createChat() {}
+  createChat() {
+    if (this.isValid() && this.chatPhoto) {
+      this.chatService.createGroupChat(
+        this.chatMembers(),
+        this.chatName(),
+        this.chatPhoto
+      );
+      this.back.emit();
+    }
+  }
 }

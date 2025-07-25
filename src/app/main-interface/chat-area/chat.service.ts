@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   Firestore,
   onSnapshot,
   Timestamp,
   updateDoc,
 } from '@angular/fire/firestore';
+import { Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -17,13 +19,14 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
-import { cloudinary } from '../../../environments/cloudinary';
 import { environment } from '../../../environments/environment.development';
 import { storeStructure } from '../../app.config';
 import { selectCurrUserUID } from '../../authentication/store/authentication.selectors';
+import { CloudinaryService } from '../../shared/cloudinary.service';
 import { Chat } from '../../shared/model/chat.model';
 import { MessagePreview } from '../../shared/model/message-preview';
 import { UserProfile } from '../../shared/model/user-profile.model';
+import { chatMemberMap } from '../../shared/types';
 import { selectUserProfile } from '../user-profile/store/user-profile.selectors';
 import { MessagesPreviewService } from './list-of-messages/message-preview/messages-preview.service';
 
@@ -36,11 +39,50 @@ export class ChatService {
   constructor(
     private firestore: Firestore,
     private store$: Store<storeStructure>,
-    private messagesPreviewService: MessagesPreviewService
+    private messagesPreviewService: MessagesPreviewService,
+    private cloudinaryService: CloudinaryService,
+    private router: Router
   ) {
     this.store$.pipe(select(selectUserProfile)).subscribe((up) => {
       this.userProfile = up.userProfile;
     });
+  }
+
+  async createGroupChat(
+    members: chatMemberMap,
+    groupChatName: string,
+    groupChatPhoto: File
+  ) {
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+    if (!userUID || !this.userProfile)
+      throw new Error('User not authenticated');
+
+    const chatPhotoLink = await this.cloudinaryService.upload(groupChatPhoto);
+
+    const chatCreated = new Chat(
+      'Group',
+      Timestamp.now(),
+      {
+        type: 'group',
+        name: groupChatName,
+      },
+      chatPhotoLink,
+      environment.defaultQuickReaction,
+      null,
+      members
+    );
+
+    const chatRef = await addDoc(collection(this.firestore, 'chats'), {
+      ...chatCreated.toJSON(),
+    });
+
+    await this.messagesPreviewService.createMessagePreviewForGroup(
+      MessagePreview.init(groupChatName, chatPhotoLink),
+      chatRef.id,
+      Object.keys(members)
+    );
   }
 
   async createPrivateChat(
@@ -93,45 +135,86 @@ export class ChatService {
   }
 
   async updateChat(chatUID: string, update: any) {
+    console.log(update);
+
     await updateDoc(doc(this.firestore, `chats/${chatUID}`), update);
   }
 
   async updateGroupPhoto(chatUID: string, photo: File, membersUID: string[]) {
-    // upload to cloudinary
-    try {
-      const data = new FormData();
-      data.append('file', photo);
-      data.append('upload_preset', cloudinary.presetName);
+    const photoLink = await this.cloudinaryService.upload(photo);
 
-      const endpoint = `https://api.cloudinary.com/v1_1/${cloudinary.cloudName}/upload`;
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        body: data,
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Cloudinary upload failed: ${res.status} ${errText}`);
-      }
-
-      const photoLink = (await res.json()).url;
-
-      // change preview and chat photo
-      await this.updateChat(chatUID, {
+    // change preview and chat photo
+    await this.updateChat(chatUID, {
+      chatPhoto: photoLink,
+    });
+    await this.messagesPreviewService.updateMessagePreview(
+      {
         chatPhoto: photoLink,
-      });
-      await this.messagesPreviewService.updateMessagePreview(
-        {
-          chatPhoto: photoLink,
-        },
-        chatUID,
-        membersUID
-      );
-    } catch (err) {
-      console.error('Failed to upload photo to cloudinary!');
-      console.error(err);
-    }
+      },
+      chatUID,
+      membersUID
+    );
+  }
+
+  async updateGroupName(
+    chatUID: string,
+    newName: string,
+    membersUID: string[]
+  ) {
+    await this.updateChat(chatUID, {
+      chatName: {
+        type: 'group',
+        name: newName,
+      },
+    });
+
+    await this.messagesPreviewService.updateMessagePreview(
+      {
+        chatName: newName,
+      },
+      chatUID,
+      membersUID
+    );
+  }
+
+  async removeMember(
+    chatUID: string,
+    members: chatMemberMap,
+    memberUID: string
+  ) {
+    await this.messagesPreviewService.removeMessagePreviewFrom(
+      memberUID,
+      chatUID
+    );
+
+    // remove from chat
+    delete members[memberUID];
+    await this.updateChat(chatUID, {
+      members: members,
+    });
+  }
+
+  async addMember(
+    member: {
+      UID: string;
+      name: string;
+      profilePicture: string;
+    },
+    chatUID: string,
+    members: chatMemberMap
+  ) {
+    // add to chat
+    members[member.UID] = {
+      name: member.name,
+      profilePicture: member.profilePicture,
+    };
+
+    await this.updateChat(chatUID, {
+      members: members,
+    });
+
+    // add to his preview
+    await this.messagesPreviewService.addMessagePreviewTo(member.UID, chatUID);
   }
 
   async selectChat(chatUID: string) {
@@ -179,5 +262,36 @@ export class ChatService {
         );
       })
     );
+  }
+
+  async deleteChat(chatUID: string, membersUID: string[]) {
+    // delete from previews
+    membersUID.forEach((m) =>
+      this.messagesPreviewService.removeMessagePreviewFrom(m, chatUID)
+    );
+
+    // delete chat
+    await deleteDoc(doc(this.firestore, `chats/${chatUID}`));
+
+    this.router.navigate(['/chat-area']).then(() => {
+      window.location.reload();
+    });
+  }
+
+  async leaveChat(chatUID: string, members: chatMemberMap) {
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+
+    if (!userUID) throw new Error('User not authenticated!');
+    await this.removeMember(chatUID, members, userUID);
+
+    // Your the only one left in the chat
+    if (Object.keys(members).length <= 1)
+      this.deleteChat(chatUID, Object.keys(members));
+
+    this.router.navigate(['/chat-area']).then(() => {
+      window.location.reload();
+    });
   }
 }

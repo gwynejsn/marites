@@ -4,9 +4,9 @@ import { doc, Firestore, setDoc } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
 import { getDoc } from 'firebase/firestore';
 import { firstValueFrom, Observable } from 'rxjs';
-import { cloudinary } from '../../../environments/cloudinary';
 import { storeStructure } from '../../app.config';
 import { selectCurrUserUID } from '../../authentication/store/authentication.selectors';
+import { CloudinaryService } from '../../shared/cloudinary.service';
 import { UserProfile } from '../../shared/model/user-profile.model';
 import { setUserProfile } from './store/user-profile.actions';
 
@@ -17,7 +17,8 @@ export class UserProfileService {
   constructor(
     private firestore: Firestore,
     private auth: Auth,
-    private store$: Store<storeStructure>
+    private store$: Store<storeStructure>,
+    private cloudinaryService: CloudinaryService
   ) {
     this.authState$ = authState(this.auth);
   }
@@ -62,36 +63,6 @@ export class UserProfileService {
     } else {
       // 2 situation: authenticated but local storage is cleared (when token is auto refreshed)
       this.loadUserProfile();
-    }
-  }
-
-  async uploadProfilePicture(
-    profilePicture: File | null
-  ): Promise<string | null> {
-    try {
-      if (!profilePicture) return null;
-
-      const data = new FormData();
-      data.append('file', profilePicture);
-      data.append('upload_preset', cloudinary.presetName);
-
-      const endpoint = `https://api.cloudinary.com/v1_1/${cloudinary.cloudName}/upload`;
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        body: data,
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Cloudinary upload failed: ${res.status} ${errText}`);
-      }
-
-      const result = await res.json();
-      return result.secure_url || result.url || null;
-    } catch (err) {
-      console.error('Error uploading profile picture:', err);
-      return null;
     }
   }
 }

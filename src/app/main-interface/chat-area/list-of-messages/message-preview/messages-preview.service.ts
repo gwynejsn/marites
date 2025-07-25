@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import {
   collection,
+  deleteDoc,
   doc,
   Firestore,
+  getDoc,
   onSnapshot,
   updateDoc,
 } from '@angular/fire/firestore';
@@ -86,6 +88,30 @@ export class MessagesPreviewService {
         doc(this.firestore, `users/${memberUID}/messagesPreview/${chatUID}`),
         messagePreview.toFirestore()
       );
+  }
+
+  async removeMessagePreviewFrom(memberUID: string, chatUID: string) {
+    await deleteDoc(
+      doc(this.firestore, `users/${memberUID}/messagesPreview/${chatUID}`)
+    );
+  }
+
+  async addMessagePreviewTo(memberUID: string, chatUID: string) {
+    // get message preview first
+    const userUID = await firstValueFrom(
+      this.store$.pipe(select(selectCurrUserUID))
+    );
+    const docSnap = await getDoc(
+      doc(this.firestore, `users/${userUID}/messagesPreview/${chatUID}`)
+    );
+
+    if (!docSnap.exists()) throw new Error('Message preview not found');
+
+    // add to his preview
+    await setDoc(
+      doc(this.firestore, `users/${memberUID}/messagesPreview/${chatUID}`),
+      docSnap.data()
+    );
   }
 
   async updateMessagePreview(

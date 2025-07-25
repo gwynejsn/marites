@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MessagePreview } from '../../../shared/model/message-preview';
+import { PreviewsSortByDatePipe } from '../../../shared/pipes/previews-sort-by-date.pipe';
 import { ChatService } from '../chat.service';
 import { CreateGroupChatComponent } from './create-group-chat/create-group-chat.component';
 import { MessagePreviewComponent } from './message-preview/message-preview.component';
@@ -16,7 +17,12 @@ import { MessagesPreviewService } from './message-preview/messages-preview.servi
 @Component({
   selector: 'app-list-of-messages',
   standalone: true,
-  imports: [MessagePreviewComponent, CommonModule, CreateGroupChatComponent],
+  imports: [
+    MessagePreviewComponent,
+    CommonModule,
+    CreateGroupChatComponent,
+    PreviewsSortByDatePipe,
+  ],
   templateUrl: './list-of-messages.component.html',
 })
 export class ListOfMessagesComponent implements OnDestroy {

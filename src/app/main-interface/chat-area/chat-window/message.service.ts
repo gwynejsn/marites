@@ -8,9 +8,9 @@ import {
 } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
 import { firstValueFrom, Observable, switchMap, throwError } from 'rxjs';
-import { cloudinary } from '../../../../environments/cloudinary';
 import { storeStructure } from '../../../app.config';
 import { selectCurrUserUID } from '../../../authentication/store/authentication.selectors';
+import { CloudinaryService } from '../../../shared/cloudinary.service';
 import { Chat } from '../../../shared/model/chat.model';
 import { Message } from '../../../shared/model/message';
 import { UserProfile } from '../../../shared/model/user-profile.model';
@@ -22,7 +22,8 @@ export class MessageService {
 
   constructor(
     private firestore: Firestore,
-    private store$: Store<storeStructure>
+    private store$: Store<storeStructure>,
+    private cloudinaryService: CloudinaryService
   ) {
     this.store$.pipe(select(selectUserProfile)).subscribe((up) => {
       this.userProfile = up.userProfile;
@@ -77,45 +78,24 @@ export class MessageService {
     const sentMessages: Message[] = [];
 
     for (const photo of photos) {
-      try {
-        const data = new FormData();
-        data.append('file', photo);
-        data.append('upload_preset', cloudinary.presetName);
+      const photoLink = await this.cloudinaryService.upload(photo);
 
-        const endpoint = `https://api.cloudinary.com/v1_1/${cloudinary.cloudName}/upload`;
+      const message = new Message(
+        'Image',
+        userUID,
+        this.userProfile.profilePicture,
+        chat.members[userUID].name,
+        Timestamp.now(),
+        '',
+        photoLink,
+        false
+      );
 
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          body: data,
-        });
+      await addDoc(collection(this.firestore, `chats/${chatUID}/messages`), {
+        ...message,
+      });
 
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`Cloudinary upload failed: ${res.status} ${errText}`);
-        }
-
-        const photoLink = (await res.json()).url;
-
-        const message = new Message(
-          'Image',
-          userUID,
-          this.userProfile.profilePicture,
-          chat.members[userUID].name,
-          Timestamp.now(),
-          '',
-          photoLink,
-          false
-        );
-
-        await addDoc(collection(this.firestore, `chats/${chatUID}/messages`), {
-          ...message,
-        });
-
-        sentMessages.push(message);
-      } catch (err) {
-        console.error('Failed to upload photo to cloudinary!');
-        console.error(err);
-      }
+      sentMessages.push(message);
     }
 
     return sentMessages;

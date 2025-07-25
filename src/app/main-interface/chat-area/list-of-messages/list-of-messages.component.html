@@ -22,14 +22,12 @@
   </div>
 
   <!-- Messages List -->
-  <div
-    class="flex flex-col gap-2 w-full overflow-y-auto flex-1 custom-scrollbar"
-  >
+  <div class="flex flex-col w-full overflow-y-auto flex-1 custom-scrollbar">
     <!-- previewId == chatID -->
     <app-message-preview
-      *ngFor="let message of messages"
+      *ngFor="let message of messages | previewsSortByDate"
       [messagePreview]="message.preview"
-      class="w-full flex-1"
+      class="w-full flex flex-col"
       (click)="chatService.selectChat(message.previewId); chatSelected.emit()"
     >
     </app-message-preview>
@@ -40,17 +38,17 @@
     >
       No messages!
     </p>
-    <button
-      *ngIf="messages && messages.length !== 0"
-      class="dark:bg-zinc-800 bg-zinc-50 p-4 rounded-2xl my-4 dark:hover:bg-zinc-700 hover:bg-zinc-100"
-      (click)="showCreateGroupChat = true"
-    >
-      Create a group chat
-    </button>
   </div>
+  <button
+    *ngIf="messages && messages.length !== 0"
+    class="w-full dark:bg-zinc-800 bg-zinc-50 p-4 rounded-2xl my-4 dark:hover:bg-zinc-700 hover:bg-zinc-100"
+    (click)="showCreateGroupChat = true"
+  >
+    Create a group chat
+  </button>
 </section>
 
 <app-create-group-chat
   *ngIf="showCreateGroupChat"
-  (cancel)="showCreateGroupChat = false"
+  (back)="showCreateGroupChat = false"
 ></app-create-group-chat>
