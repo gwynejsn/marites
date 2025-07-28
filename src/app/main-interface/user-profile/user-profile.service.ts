@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Auth, authState, User } from '@angular/fire/auth';
-import { doc, Firestore, setDoc } from '@angular/fire/firestore';
+import { doc, Firestore, onSnapshot, setDoc } from '@angular/fire/firestore';
 import { select, Store } from '@ngrx/store';
-import { getDoc } from 'firebase/firestore';
-import { firstValueFrom, Observable } from 'rxjs';
+import { Observable, Subscription, switchMap, throwError } from 'rxjs';
 import { storeStructure } from '../../app.config';
 import { selectCurrUserUID } from '../../authentication/store/authentication.selectors';
 import { CloudinaryService } from '../../shared/cloudinary.service';
@@ -11,8 +10,9 @@ import { UserProfile } from '../../shared/model/user-profile.model';
 import { setUserProfile } from './store/user-profile.actions';
 
 @Injectable({ providedIn: 'root' })
-export class UserProfileService {
+export class UserProfileService implements OnDestroy {
   private authState$: Observable<User | null>;
+  private userProfileSub!: Subscription;
 
   constructor(
     private firestore: Firestore,
@@ -23,12 +23,15 @@ export class UserProfileService {
     this.authState$ = authState(this.auth);
   }
 
-  // Save user profile using UID as document ID
-  async addUserProfile(userProfile: UserProfile): Promise<void> {
-    const userUID = await firstValueFrom(
-      this.store$.pipe(select(selectCurrUserUID))
-    );
+  ngOnDestroy(): void {
+    this.userProfileSub?.unsubscribe();
+  }
 
+  // Save user profile using UID as document ID
+  async addUserProfile(
+    userProfile: UserProfile,
+    userUID: string
+  ): Promise<void> {
     if (!userUID) throw new Error('User not authenticated');
 
     const userDocRef = doc(this.firestore, 'users', userUID);
@@ -38,20 +41,42 @@ export class UserProfileService {
     this.store$.dispatch(setUserProfile({ userProfile: userProfile }));
   }
 
-  async getUserProfile(): Promise<UserProfile> {
-    const userUID = await firstValueFrom(
-      this.store$.pipe(select(selectCurrUserUID))
+  getUserProfile(): Observable<{
+    id: string;
+    profile: UserProfile;
+  }> {
+    return this.store$.pipe(
+      select(selectCurrUserUID),
+      switchMap((userUID) => {
+        if (!userUID) {
+          return throwError(() => new Error('User not authenticated'));
+        }
+
+        const docRef = doc(this.firestore, 'users', userUID);
+        return new Observable<{ id: string; profile: UserProfile }>(
+          (subscriber) => {
+            const userProfileUnsubscribe = onSnapshot(
+              docRef,
+              (snapshot) =>
+                subscriber.next({
+                  id: snapshot.id,
+                  profile: UserProfile.fromJSON(snapshot.data()),
+                }),
+
+              (error) => subscriber.error(error)
+            );
+
+            return userProfileUnsubscribe;
+          }
+        );
+      })
     );
-
-    if (!userUID) throw new Error('User not authenticated');
-
-    const docRef = doc(this.firestore, 'users', userUID);
-    return (await getDoc(docRef)).data() as UserProfile;
   }
 
   async loadUserProfile(): Promise<void> {
-    const userProfileFetched = await this.getUserProfile();
-    this.store$.dispatch(setUserProfile({ userProfile: userProfileFetched }));
+    this.userProfileSub = this.getUserProfile().subscribe((up) => {
+      this.store$.dispatch(setUserProfile({ userProfile: up.profile }));
+    });
   }
 
   async autoLoadUserProfile(): Promise<void> {

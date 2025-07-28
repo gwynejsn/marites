@@ -64,9 +64,13 @@ export class AuthenticationService {
         []
       );
 
-      // upload user profile
+      console.log('adding profile ', newUserProfile);
 
-      await this.userProfileService.addUserProfile(newUserProfile);
+      // upload user profile
+      await this.userProfileService.addUserProfile(
+        newUserProfile,
+        accCreatedRef.user.uid
+      );
       this.store$.dispatch(signUpSuccess({ uid: accCreatedRef.user.uid })); // set loading to false
       this.router.navigate(['/chat-area']);
     } catch (err: any) {
@@ -82,7 +86,7 @@ export class AuthenticationService {
     try {
       await signOut(this.auth);
       this.store$.dispatch(removeUserProfile());
-      this.router.navigate(['/authentication']);
+      this.router.navigate(['/']);
       this.store$.dispatch(logoutSuccess());
     } catch (err: any) {
       this.store$.dispatch(
@@ -100,8 +104,8 @@ export class AuthenticationService {
       );
 
       // get user and set profile
-      await this.userProfileService.loadUserProfile();
       this.store$.dispatch(loginSuccess({ uid: loggedInRef.user.uid }));
+      await this.userProfileService.loadUserProfile();
       this.router.navigate(['/chat-area']);
     } catch (err: any) {
       this.store$.dispatch(

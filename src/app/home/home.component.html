@@ -1,5 +1,295 @@
-<p>home works!</p>
+<section class="w-full min-h-screen flex flex-col items-center">
+  <!-- Header -->
+  <header
+    class="w-full px-4 sm:px-6 lg:px-16 pt-6 pb-4 flex justify-between items-center"
+  >
+    <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white">
+      Marites
+    </h1>
+    <div class="flex gap-2 sm:gap-4 flex-wrap">
+      <button
+        class="bg-zinc-50 text-zinc-900 font-semibold py-2 px-4 rounded-xl text-sm sm:text-base"
+        [routerLink]="['/authentication', 'sign-up']"
+      >
+        Sign-up
+      </button>
+      <button
+        class="bg-primary py-2 px-4 font-semibold rounded-xl text-zinc-50 text-sm sm:text-base"
+        [routerLink]="['/authentication']"
+      >
+        Login
+      </button>
+    </div>
+  </header>
 
-<button class="bg-primary p-4 rounded-full" [routerLink]="['/authentication']">
-  Login
-</button>
+  <!-- Demo Image Section -->
+  <div class="w-full flex flex-col items-center justify-center relative px-4">
+    <div
+      class="relative w-full flex justify-center items-center"
+      [ngClass]="{ 'my-35': !isMobile, 'my-8': isMobile }"
+    >
+      <div
+        *ngIf="!isMobile"
+        class="border w-[90vw] sm:w-[80vw] h-[50vh] shadow-2xl rounded-xl"
+        [ngClass]="{
+          'bg-zinc-900 border-zinc-600': showDarkModeDemo(),
+          'bg-zinc-50 border-zinc-400': !showDarkModeDemo(),
+        }"
+      ></div>
+
+      <!-- Desktop Image -->
+      <img
+        *ngIf="!isMobile; else mobileDemo"
+        [src]="
+          showDarkModeDemo()
+            ? 'assets/demo/dark-mode-demo.png'
+            : 'assets/demo/light-mode-demo.png'
+        "
+        class="absolute z-20 w-[90vw] sm:w-[700px] md:w-[1000px] rounded-xl"
+      />
+      <!-- Mobile Image -->
+      <ng-template #mobileDemo>
+        <img
+          [src]="
+            showDarkModeDemo()
+              ? 'assets/demo/dark-mode-mobile-demo.png'
+              : 'assets/demo/light-mode-mobile-demo.png'
+          "
+          class="w-[90vw] sm:w-[600px] rounded-xl shadow-xl"
+        />
+      </ng-template>
+    </div>
+
+    <!-- Toggle Dark Mode Button -->
+    <button
+      class="mt-6 flex gap-2 sm:gap-4 py-2 px-4 items-center justify-center hover:scale-105 transition-transform rounded-xl font-semibold text-sm sm:text-base"
+      (click)="darkModeService.toggleDarkMode()"
+      [ngClass]="{
+        'bg-zinc-800 text-white': showDarkModeDemo(),
+        'bg-violet-300 text-zinc-700': !showDarkModeDemo()
+      }"
+    >
+      <!-- light mode sun -->
+      <svg
+        *ngIf="!darkModeService.darkMode()"
+        class="w-9"
+        version="1.0"
+        id="Layer_1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 64 64"
+        enable-background="new 0 0 64 64"
+        xml:space="preserve"
+        fill="#fffb00"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g
+          id="SVGRepo_tracerCarrier"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></g>
+        <g id="SVGRepo_iconCarrier">
+          <g>
+            <circle
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              cx="32.003"
+              cy="32.005"
+              r="16.001"
+            ></circle>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              d="M12.001,31.997c0-2.211-1.789-4-4-4H4c-2.211,0-4,1.789-4,4 s1.789,4,4,4h4C10.212,35.997,12.001,34.208,12.001,31.997z"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              d="M12.204,46.139l-2.832,2.833c-1.563,1.562-1.563,4.094,0,5.656 c1.562,1.562,4.094,1.562,5.657,0l2.833-2.832c1.562-1.562,1.562-4.095,0-5.657C16.298,44.576,13.767,44.576,12.204,46.139z"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              d="M32.003,51.999c-2.211,0-4,1.789-4,4V60c0,2.211,1.789,4,4,4 s4-1.789,4-4l-0.004-4.001C36.003,53.788,34.21,51.999,32.003,51.999z"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              d="M51.798,46.143c-1.559-1.566-4.091-1.566-5.653-0.004 s-1.562,4.095,0,5.657l2.829,2.828c1.562,1.57,4.094,1.562,5.656,0s1.566-4.09,0-5.656L51.798,46.143z"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              d="M60.006,27.997l-4.009,0.008 c-2.203-0.008-3.992,1.781-3.992,3.992c-0.008,2.211,1.789,4,3.992,4h4.001c2.219,0.008,4-1.789,4-4 C64.002,29.79,62.217,27.997,60.006,27.997z"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              d="M51.798,17.859l2.828-2.829c1.574-1.566,1.562-4.094,0-5.657 c-1.559-1.567-4.09-1.567-5.652-0.004l-2.829,2.836c-1.562,1.555-1.562,4.086,0,5.649C47.699,19.426,50.239,19.418,51.798,17.859z"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              d="M32.003,11.995c2.207,0.016,4-1.789,4-3.992v-4 c0-2.219-1.789-4-4-4c-2.211-0.008-4,1.781-4,3.993l0.008,4.008C28.003,10.206,29.792,11.995,32.003,11.995z"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              fill="#f5ec00"
+              d="M12.212,17.855c1.555,1.562,4.079,1.562,5.646-0.004 c1.574-1.551,1.566-4.09,0.008-5.649l-2.829-2.828c-1.57-1.571-4.094-1.559-5.657,0c-1.575,1.559-1.575,4.09-0.012,5.653 L12.212,17.855z"
+            ></path>
+          </g>
+        </g>
+      </svg>
+
+      <!-- dark mode moon -->
+      <svg
+        *ngIf="darkModeService.darkMode()"
+        class="w-9"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g
+          id="SVGRepo_tracerCarrier"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></g>
+        <g id="SVGRepo_iconCarrier">
+          <path
+            d="M12 22C17.5228 22 22 17.5228 22 12C22 11.5373 21.3065 11.4608 21.0672 11.8568C19.9289 13.7406 17.8615 15 15.5 15C11.9101 15 9 12.0899 9 8.5C9 6.13845 10.2594 4.07105 12.1432 2.93276C12.5392 2.69347 12.4627 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+            fill="#FCE96A"
+          ></path>
+        </g>
+      </svg>
+      <span>{{ showDarkModeDemo() ? "Dark mode" : "Light mode" }}</span>
+    </button>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section
+  class="w-full flex flex-col items-center justify-center px-4 sm:px-6"
+  [ngClass]="{ 'mt-20': !isMobile, 'mt-8': isMobile }"
+>
+  <div class="max-w-2xl text-center">
+    <h1
+      class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4"
+    >
+      Marites
+    </h1>
+    <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-4">
+      The simple messaging app for staying connected.
+    </p>
+    <p class="text-base text-gray-500 dark:text-gray-400 mb-6">
+      Marites lives on your phone or desktop, letting you send real-time
+      messages, photos, and updates with ease — privately and instantly.
+    </p>
+  </div>
+
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl mt-8"
+  >
+    <div class="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-6 shadow text-center">
+      <h4 class="text-lg font-semibold text-zinc-800 dark:text-white mb-2">
+        Real-Time Chat
+      </h4>
+      <p class="text-zinc-600 dark:text-zinc-400 text-sm">
+        Send and receive messages instantly via Firebase.
+      </p>
+    </div>
+    <div class="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-6 shadow text-center">
+      <h4 class="text-lg font-semibold text-zinc-800 dark:text-white mb-2">
+        Media Support
+      </h4>
+      <p class="text-zinc-600 dark:text-zinc-400 text-sm">
+        Share images and media easily.
+      </p>
+    </div>
+    <div class="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-6 shadow text-center">
+      <h4 class="text-lg font-semibold text-zinc-800 dark:text-white mb-2">
+        Private & Group Chats
+      </h4>
+      <p class="text-zinc-600 dark:text-zinc-400 text-sm">
+        Switch easily between private and group convos.
+      </p>
+    </div>
+  </div>
+
+  <!-- CTA Buttons -->
+  <div class="mt-10 text-center">
+    <p class="text-md sm:text-lg text-zinc-700 dark:text-zinc-300 mb-4">
+      Ready to chat smarter, faster, simpler?
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
+      <a
+        [routerLink]="['/authentication', 'sign-up']"
+        class="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition text-sm sm:text-base"
+      >
+        Get Started
+      </a>
+      <a
+        href="https://github.com/gwynejsn"
+        class="px-6 py-3 rounded-xl border border-zinc-400 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-sm sm:text-base"
+      >
+        Contact Me
+      </a>
+    </div>
+  </div>
+
+  <!-- Tech Stack -->
+  <div class="mt-16 px-4 text-center">
+    <h3 class="text-2xl font-semibold mb-6 text-zinc-800 dark:text-zinc-200">
+      Technologies Used
+    </h3>
+    <div class="flex flex-wrap justify-center gap-6">
+      <ng-container *ngFor="let tech of techStack">
+        <a
+          [href]="tech.link"
+          target="_blank"
+          class="w-20 h-20 sm:w-24 sm:h-24 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-xl shadow hover:scale-105 transition flex items-center justify-center"
+        >
+          <img
+            [src]="tech.img"
+            [alt]="tech.name"
+            class="w-full h-full object-contain"
+            [ngClass]="{
+              invert: tech.name === 'Cloudinary' && !darkModeService.darkMode()
+            }"
+          />
+        </a>
+      </ng-container>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer
+  class="w-full mt-12 py-8 px-4 sm:px-6 md:px-12 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700"
+>
+  <div
+    class="max-w-screen-xl mx-auto text-center text-zinc-600 dark:text-zinc-400 text-sm"
+  >
+    <p>
+      Built with ❤️ by
+      <a
+        href="https://github.com/gwynejsn"
+        class="font-medium text-zinc-800 dark:text-zinc-200 hover:underline"
+      >
+        gwynejsn
+      </a>
+      — a personal side project to explore design and real-time messaging using
+      Angular.
+    </p>
+    <p class="mt-2">©2025 All rights reserved.</p>
+  </div>
+</footer>

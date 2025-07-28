@@ -1,9 +1,9 @@
 <div
-  class="flex h-screen px-8 py-16 gap-4 flex-col sm:flex-col md:flex-row lg:flex-row"
+  class="flex lg:h-screen md:h-screen px-8 py-16 gap-4 flex-col sm:flex-col md:flex-row lg:flex-row"
 >
   <!-- Friends Section -->
   <section
-    class="flex flex-col min-w-[30%] items-center py-2 px-4 border-2 rounded-lg border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 sm:h-[30vh] md:h-full overflow-y-auto pt-4"
+    class="flex flex-col min-w-[30%] items-center py-2 px-4 border-2 rounded-lg border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 h-[40vh] sm:h-[50vh] md:h-full overflow-y-auto pt-4"
   >
     <!-- Default Header (Title + Search Icon) -->
     <div
@@ -25,7 +25,9 @@
 
     <!-- Search Bar -->
     <ng-template #searchBar>
-      <div class="flex items-center w-full gap-2 mb-4">
+      <div
+        class="flex items-center w-full gap-2 mb-4 transition-all duration-300 ease-in-out"
+      >
         <div class="relative w-full">
           <input
             type="text"
@@ -41,7 +43,7 @@
         <button
           class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
           aria-label="Close Search"
-          (click)="toggleSearchBar.set(false)"
+          (click)="toggleSearchBar.set(false); searchTerm = ''"
         >
           <i class="fas fa-times text-zinc-600 dark:text-zinc-300"></i>
         </button>
@@ -91,7 +93,7 @@
         </div>
 
         <div
-          *ngIf="filteredFriends.length === 0"
+          *ngIf="filteredFriends.length === 0 && friends.length > 0"
           class="text-center text-zinc-500 mt-8"
         >
           No friend with term '{{ searchTerm }}' found.

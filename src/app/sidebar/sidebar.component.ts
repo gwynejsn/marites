@@ -19,11 +19,21 @@ import { DarkModeService } from '../shared/dark-mode.service';
 export class SidebarComponent {
   showSidebar = signal(false);
   showLogoutPopup = signal(false);
+  isMobile = false;
 
   constructor(
     public darkModeService: DarkModeService,
     private authenticationService: AuthenticationService
   ) {}
+
+  ngOnInit() {
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 768; // md breakpoint
+  }
 
   toggleSidebar() {
     this.showSidebar.update((v) => !v);

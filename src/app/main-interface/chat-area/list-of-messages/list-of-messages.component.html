@@ -42,7 +42,7 @@
       ></app-message-preview>
 
       <div
-        *ngIf="filteredMessages.length === 0"
+        *ngIf="filteredMessages.length === 0 && messages.length > 0"
         class="text-center text-zinc-500 mt-8"
       >
         No chat with term '{{ searchTerm }}' found.

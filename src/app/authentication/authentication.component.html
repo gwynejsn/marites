@@ -1,8 +1,52 @@
-<div class="flex">
-  <div class="w-1/2 min-h-screen bg-primary"></div>
+<div
+  class="flex min-h-screen w-full overflow-hidden bg-white dark:bg-black text-zinc-900 dark:text-zinc-100"
+>
   <div
-    class="w-1/2 min-h-screen flex justify-center items-center bg-surface z-50"
+    class="hidden lg:flex w-1/2 flex-col justify-center items-center px-12 bg-gradient-to-br from-purple-100 via-purple-200 to-indigo-100 dark:from-[#1a1024] dark:via-[#210c33] dark:to-[#120820] relative"
   >
-    <router-outlet />
+    <button
+      class="absolute left-20 top-10 text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors"
+      [routerLink]="['/']"
+    >
+      <i class="fa-solid fa-circle-chevron-left fa-2xl"></i>
+    </button>
+    <div class="max-w-md text-center flex flex-col items-center justify-center">
+      <img
+        src="favicon.ico"
+        alt="Chat Illustration"
+        class="mt-12 max-w-sm drop-shadow-2xl w-[60px] mb-8"
+      />
+      <h2 class="text-4xl font-bold mb-4 text-zinc-800 dark:text-white">
+        Welcome to Marties
+      </h2>
+      <p class="text-lg text-zinc-700 dark:text-zinc-300">
+        Your private, smart and friendly messaging app. Connect freely. Talk
+        openly.
+      </p>
+    </div>
+
+    <footer
+      class="absolute bottom-6 text-sm text-zinc-600 dark:text-zinc-400 text-center w-full px-6 items-center justify-center flex"
+    >
+      <p class="w-[80%]">
+        Built with ❤️ by
+        <a
+          href="https://github.com/gwynejsn"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium text-zinc-800 dark:text-zinc-200 hover:underline"
+        >
+          gwynejsn
+        </a>
+        — a personal side project to explore design and real-time messaging
+        application using Angular.
+      </p>
+    </footer>
+  </div>
+
+  <div
+    class="w-full lg:w-1/2 min-h-screen flex justify-center items-center bg-surface dark:bg-[#1f1f29] relative z-50 transition-all"
+  >
+    <router-outlet></router-outlet>
   </div>
 </div>

@@ -6,6 +6,7 @@ import { HomeComponent } from './home/home.component';
 import { ChatAreaComponent } from './main-interface/chat-area/chat-area.component';
 import { FriendsComponent } from './main-interface/friends/friends.component';
 import { UserProfileComponent } from './main-interface/user-profile/user-profile.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { authenticationGuard } from './shared/guards/authentication.guard';
 
 export const routes: Routes = [
@@ -48,5 +49,8 @@ export const routes: Routes = [
       },
     ],
   },
-  // TODO page not found
+  {
+    path: '**',
+    component: PageNotFoundComponent,
+  },
 ];

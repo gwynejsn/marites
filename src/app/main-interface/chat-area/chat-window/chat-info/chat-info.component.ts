@@ -70,6 +70,8 @@ export class ChatInfoComponent implements OnInit {
   confirmLeaveChat = signal(false);
   confirmDeleteChat = signal(false);
 
+  isMobile = false;
+
   constructor(
     public chatService: ChatService,
     private store$: Store<storeStructure>
@@ -82,6 +84,12 @@ export class ChatInfoComponent implements OnInit {
   ngOnInit(): void {
     this.chatColor = this.chat()?.backgroundColor || '#6c5ce7';
     this.quickReaction = this.chat()?.quickReaction!;
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 768; // md breakpoint
   }
 
   async updateChatColor() {

@@ -156,8 +156,6 @@ export class ChatService {
   }
 
   async updateChat(chatUID: string, update: any) {
-    console.log(update);
-
     await updateDoc(doc(this.firestore, `chats/${chatUID}`), update);
   }
 
@@ -166,7 +164,10 @@ export class ChatService {
 
     // change preview and chat photo
     await this.updateChat(chatUID, {
-      chatPhoto: photoLink,
+      chatPhoto: {
+        type: 'group',
+        photo: photoLink,
+      },
     });
     await this.messagesPreviewService.updateMessagePreview(
       {

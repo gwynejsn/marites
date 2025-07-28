@@ -1,4 +1,5 @@
 <section
+  *ngIf="!isMobile"
   class="flex flex-col justify-between h-screen py-6 px-4 bg-sidebar dark:bg-sidebar-dark drop-shadow-xl text-color-primary-dark text-md"
   [ngClass]="{
     'w-[200px]': showSidebar(),
@@ -277,3 +278,61 @@
   (cancel)="showLogoutPopup.set(!showLogoutPopup())"
   (confirm)="logout()"
 ></app-confirm-dialog>
+
+<!-- Mobile Top Navbar -->
+<nav
+  *ngIf="isMobile"
+  class="fixed top-0 left-0 right-0 z-50 bg-sidebar dark:bg-sidebar-dark text-color-primary-dark text-sm font-medium flex justify-around items-center h-14 px-2 shadow-md"
+>
+  <a
+    [routerLink]="['/chat-area']"
+    routerLinkActive="text-primary border-b-2 border-primary"
+    class="px-2 py-1 hover:text-primary transition"
+  >
+    Chat
+  </a>
+
+  <a
+    [routerLink]="['/friends']"
+    routerLinkActive="text-primary border-b-2 border-primary"
+    class="px-2 py-1 hover:text-primary transition"
+  >
+    Friends
+  </a>
+
+  <a
+    [routerLink]="['/user-profile']"
+    routerLinkActive="text-primary border-b-2 border-primary"
+    class="px-2 py-1 hover:text-primary transition"
+  >
+    Profile
+  </a>
+
+  <button
+    (click)="darkModeService.toggleDarkMode()"
+    class="px-2 py-1 hover:text-primary transition"
+  >
+    {{ darkModeService.darkMode() ? "Dark" : "Light" }}
+  </button>
+
+  <button
+    (click)="showLogoutPopup.set(true)"
+    class="px-2 py-1 hover:text-red-500 text-red-400 transition"
+  >
+    Logout
+  </button>
+</nav>
+
+<!-- Logout confirmation -->
+<app-confirm-dialog
+  *ngIf="showLogoutPopup()"
+  [data]="{
+    mainMessage: 'Log out?',
+    description:
+      'You will need to sign in again to access your account. Do you want to continue?',
+    cancelText: 'cancel',
+    confirmText: 'logout'
+  }"
+  (cancel)="showLogoutPopup.set(false)"
+  (confirm)="logout()"
+/>

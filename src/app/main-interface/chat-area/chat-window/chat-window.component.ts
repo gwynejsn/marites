@@ -105,6 +105,7 @@ export class ChatWindowComponent implements OnDestroy {
     this.chatSub = this.chatService.getChat().subscribe((c) => {
       this.chat.set(c.chat);
       this.chatUID = c.id;
+
       if (
         c.chat.chatName.type === 'private' &&
         c.chat.chatPhoto.type === 'private' &&
@@ -118,6 +119,7 @@ export class ChatWindowComponent implements OnDestroy {
       ) {
         this.chatName = c.chat.chatName.name ?? 'Unknown';
         this.chatPhoto = c.chat.chatPhoto.photo ?? '';
+        console.log(this.chatPhoto);
       }
 
       this.messagesSub = this.messageService

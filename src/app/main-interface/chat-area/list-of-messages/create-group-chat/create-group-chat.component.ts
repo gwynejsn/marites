@@ -13,6 +13,7 @@ import { environment } from '../../../../../environments/environment.development
 import { storeStructure } from '../../../../app.config';
 import { selectCurrUserUID } from '../../../../authentication/store/authentication.selectors';
 import { Friend } from '../../../../shared/model/friend.model';
+import { SearchByNamePipe } from '../../../../shared/pipes/search-by-name.pipe';
 import { chatMemberMap } from '../../../../shared/types';
 import { FriendsService } from '../../../friends/friends.service';
 import { selectUserProfile } from '../../../user-profile/store/user-profile.selectors';
@@ -20,7 +21,7 @@ import { ChatService } from '../../chat.service';
 
 @Component({
   selector: 'app-create-group-chat',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SearchByNamePipe],
   templateUrl: './create-group-chat.component.html',
 })
 export class CreateGroupChatComponent {
@@ -41,6 +42,8 @@ export class CreateGroupChatComponent {
 
   chatPhotoPreview: string | ArrayBuffer | null =
     environment.defaultProfilePicture;
+
+  searchTerm = '';
 
   chatPhoto: File | null = null;
   chatMembers = signal<chatMemberMap>({});

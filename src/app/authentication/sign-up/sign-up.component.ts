@@ -28,6 +28,8 @@ export class SignUpComponent {
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
 
+  isMobile = false;
+
   formData = {
     firstName: '',
     lastName: '',
@@ -45,6 +47,15 @@ export class SignUpComponent {
   ) {
     this.loading$ = store$.pipe(select(selectAuthLoading));
     this.error$ = store$.pipe(select(selectAuthError));
+  }
+
+  ngOnInit() {
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 768; // md breakpoint
   }
 
   async signup() {

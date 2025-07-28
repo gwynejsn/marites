@@ -21,6 +21,8 @@ export class LoginComponent {
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
 
+  isMobile = false;
+
   constructor(
     private router: Router,
     private store$: Store<storeStructure>,
@@ -31,7 +33,15 @@ export class LoginComponent {
   }
 
   login(val: { email: string; password: string }) {
-    console.log('logging in');
     this.authenticationService.login(val.email, val.password);
+  }
+
+  ngOnInit() {
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 768; // md breakpoint
   }
 }
