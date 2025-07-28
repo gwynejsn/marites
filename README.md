@@ -1,5 +1,30 @@
 # Marites
 
+**Marites** is a simple messaging app built with Angular. Designed for **real-time conversations**, **media sharing**, and **group chats**, it features full **dark mode support**, responsive mobile design, and uses **Firebase**.
+
+---
+
+## Live website
+
+https://marites-277f8.web.app
+
+---
+
+## Preview
+
+![Marites Demo](./public/assets/demo/dark-mode-demo.png)
+
+---
+
+## Features
+
+- **Real-Time Chat** – Instant message updates using Firebase
+- ️**Media Sharing** – Seamless image upload & display
+- **Private & Group Chats** – Switch between 1-on-1 and group messaging
+- **Dark Mode Toggle** – One click to switch light/dark UI themes
+- **Responsive Design** – Looks great on both mobile and desktop
+- **Custom UI Elements** – Built from scratch with Tailwind
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.8.
 
 ## Development server
@@ -57,3 +82,7 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+```
+
+```
